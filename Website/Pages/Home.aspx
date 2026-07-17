@@ -168,7 +168,7 @@
                                     <p><%# Eval("Description") %></p>
                                     <div class="menu-footer">
                                         <span class="menu-price">$<%# Eval("Price") %></span>
-                                        <a href="ProductDetails.aspx?ID=<%# Eval("MenuItemID") %>" class="btn btn-sm btn-primary">View Details</a>
+                                        <a href="Menu.aspx" class="btn btn-sm btn-primary">View Menu</a>
                                     </div>
                                 </div>
                             </div>

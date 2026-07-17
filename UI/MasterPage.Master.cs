@@ -3,6 +3,7 @@
 // ============================================
 
 using System;
+using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using RestaurantManagementSystem.Models;
@@ -45,7 +46,7 @@ namespace RestaurantManagementSystem.UI
             }
 
             // Display user name in navigation
-            ltrUserName.Text = user.FullName;
+            ltrUserName.Text = HttpUtility.HtmlEncode(user.FullName);
 
             // Store user info in session
             Session["User"] = user;

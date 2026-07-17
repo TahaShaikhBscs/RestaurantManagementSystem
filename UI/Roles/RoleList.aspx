@@ -132,9 +132,9 @@
                                         CommandName="Permissions" CommandArgument='<%# Eval("RoleID") %>' />
                                     <asp:Button ID="btnEdit" runat="server" Text="Edit" CssClass="btn btn-primary"
                                         CommandName="EditRole" CommandArgument='<%# Eval("RoleID") %>' />
-                                    <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn btn-danger"
-                                        CommandName="DeleteRole" CommandArgument='<%# Eval("RoleID") %>'
-                                        data-bs-toggle="modal" data-bs-target="#deleteModal" />
+                                    <button type="button" class="btn btn-danger" data-delete-id='<%# Eval("RoleID") %>'>
+                                        Delete
+                                    </button>
                                 </div>
                             </ItemTemplate>
                         </asp:TemplateField>
@@ -211,9 +211,9 @@
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
     <script type="text/javascript">
         $(document).ready(function () {
-            $('[data-bs-toggle="modal"]').on('click', function () {
-                var roleID = $(this).closest('tr').find('[id$="btnDelete"]').attr('CommandArgument');
-                $('#<%= hfDeleteRoleID.ClientID %>').val(roleID);
+            $(document).on('click', '[data-delete-id]', function () {
+                $('#<%= hfDeleteRoleID.ClientID %>').val($(this).data('delete-id'));
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteModal')).show();
             });
 
             setTimeout(function () {

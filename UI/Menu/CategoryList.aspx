@@ -245,11 +245,6 @@
                 $('.alert').fadeOut('slow');
             }, 5000);
 
-            // Set category ID for delete modal
-            $('[data-bs-toggle="modal"]').on('click', function () {
-                var categoryID = $(this).closest('tr').find('[id$="btnDelete"]').attr('CommandArgument');
-                $('#<%= hfDeleteCategoryID.ClientID %>').val(categoryID);
-            });
         }); 
         function showDeleteModal(id) {
 

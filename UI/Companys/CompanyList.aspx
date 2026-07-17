@@ -131,9 +131,9 @@
                                 <div class="btn-group btn-group-sm" role="group">
                                     <asp:Button ID="btnEdit" runat="server" Text="Edit" CssClass="btn btn-primary"
                                         CommandName="EditCompany" CommandArgument='<%# Eval("CompanyID") %>' />
-                                    <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn btn-danger"
-                                        CommandName="DeleteCompany" CommandArgument='<%# Eval("CompanyID") %>'
-                                        data-bs-toggle="modal" data-bs-target="#deleteModal" />
+                                    <button type="button" class="btn btn-danger" data-delete-id='<%# Eval("CompanyID") %>'>
+                                        Delete
+                                    </button>
                                 </div>
                             </ItemTemplate>
                         </asp:TemplateField>
@@ -210,10 +210,9 @@
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
     <script type="text/javascript">
         $(document).ready(function () {
-            // Set company ID for delete modal
-            $('[data-bs-toggle="modal"]').on('click', function () {
-                var companyID = $(this).closest('tr').find('[id$="btnDelete"]').attr('CommandArgument');
-                $('#<%= hfDeleteCompanyID.ClientID %>').val(companyID);
+            $(document).on('click', '[data-delete-id]', function () {
+                $('#<%= hfDeleteCompanyID.ClientID %>').val($(this).data('delete-id'));
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteModal')).show();
             });
 
             setTimeout(function () {
