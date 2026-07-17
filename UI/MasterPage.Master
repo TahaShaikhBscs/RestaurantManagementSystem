@@ -1,0 +1,362 @@
+﻿<!-- =========================================== -->
+<!-- UI/MasterPage.master -->
+<!-- =========================================== -->
+
+<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="MasterPage.master.cs" Inherits="RestaurantManagementSystem.UI.MasterPage" %>
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+        <asp:ContentPlaceHolder ID="TitleContent" runat="server">Restaurant Management System</asp:ContentPlaceHolder>
+    </title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+
+    <!-- Custom CSS -->
+    <link href="~/Content/Site.css" rel="stylesheet" />
+
+    <asp:ContentPlaceHolder ID="HeadContent" runat="server"></asp:ContentPlaceHolder>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <asp:ScriptManager ID="ScriptManager1" runat="server" />
+        <!-- ============================================ -->
+        <!-- UI/MasterPage.master - Updated Navigation -->
+        <!-- ============================================ -->
+
+        <!-- Replace the navigation section in MasterPage.master with this updated version -->
+
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="Dashboard.aspx">
+                    <i class="fas fa-utensils me-2"></i>RMS
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <!-- Dashboard -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="<%= ResolveUrl("~/UI/Dashboard.aspx") %>">
+                                <i class="fas fa-chart-pie me-1"></i>Dashboard
+                            </a>
+                        </li>
+
+                        <!-- POS -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="<%= ResolveUrl("~/UI/POS/POS.aspx") %>">
+                                <i class="fas fa-cash-register me-1"></i>POS
+                            </a>
+                        </li>
+
+                        <!-- Orders -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="<%= ResolveUrl("~/UI/Orders/OrderList.aspx") %>">
+                                <i class="fas fa-receipt me-1"></i>Orders
+                            </a>
+                        </li>
+
+                        <!-- Kitchen -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="<%= ResolveUrl("~/UI/Kitchen/KitchenDisplay.aspx") %>">
+                                <%--<a class="nav-link" href="Kitchen/KitchenDisplay.aspx">--%>
+                                <i class="fas fa-utensil-spoon me-1"></i>Kitchen
+                            </a>
+                        </li>
+
+                        <!-- Management Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                <i class="fas fa-cogs me-1"></i>Management
+                            </a>
+                            <ul class="dropdown-menu">
+                                <!-- Company -->
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Companys/CompanyList.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Company/CompanyList.aspx">--%>
+                                    <i class="fas fa-building me-1"></i>Companies</a>
+                                </li>
+                                <!-- Branch -->
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Branchs/BranchList.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Branch/BranchList.aspx">--%>
+                                    <i class="fas fa-store-alt me-1"></i>Branches</a>
+                                </li>
+                                <!-- Users -->
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Users/UserList.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Users/UserList.aspx">--%>
+                                    <i class="fas fa-users me-1"></i>Users</a>
+                                </li>
+                                <!-- Roles -->
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Roles/RoleList.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Roles/RoleList.aspx">--%>
+                                    <i class="fas fa-user-shield me-1"></i>Roles</a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider" />
+                                </li>
+                                <!-- Tables -->
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Tables/TableList.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Tables/TableList.aspx">--%>
+                                    <i class="fas fa-chair me-1"></i>Tables</a>
+                                </li>
+                                <!-- Customers -->
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Customers/CustomerList.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Customers/CustomerList.aspx">--%>
+                                    <i class="fas fa-user-friends me-1"></i>Customers</a>
+                                </li>
+                                <!-- Suppliers -->
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Suppliers/SupplierList.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Suppliers/SupplierList.aspx">--%>
+                                    <i class="fas fa-truck me-1"></i>Suppliers</a>
+                                </li>
+
+                                <!-- Option 1: Add to Management dropdown -->
+                                 <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Deals/DealsList.aspx") %>">
+                                    <i class="fas fa-tags me-1"></i>Deals & Combos</a>
+                                </li>
+
+                                <!-- Option 2: Create a new top-level menu item -->
+                                <li class="nav-item">
+                                     <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Deals/DealsList.aspx") %>">
+                                        <i class="fas fa-tags me-1"></i>Deals
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+
+                        <!-- Menu Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                <i class="fas fa-utensils me-1"></i>Menu
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Menu/CategoryList.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Menu/CategoryList.aspx">--%>
+                                    <i class="fas fa-list me-1"></i>Categories</a>
+                                </li>
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Menu/MenuList.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Menu/MenuList.aspx">--%>
+                                    <i class="fas fa-hamburger me-1"></i>Menu Items</a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- Inventory Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                <i class="fas fa-boxes me-1"></i>Inventory
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Stock/StockList.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Stock/StockList.aspx">--%>
+                                    <i class="fas fa-box me-1"></i>Stock Items</a>
+                                </li>
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Stock/StockAdjustment.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Stock/StockAdjustment.aspx">--%>
+                                    <i class="fas fa-balance-scale me-1"></i>Stock Adjustment</a>
+                                </li>
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Purchases/PurchaseList.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Purchases/PurchaseList.aspx">--%>
+                                    <i class="fas fa-shopping-cart me-1"></i>Purchase Orders</a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- Expenses -->
+                        <li class="nav-item">
+                            <a class="nav-link" href="<%= ResolveUrl("~/UI/Expenses/ExpenseList.aspx") %>">
+                                <%--<a class="nav-link" href="Expenses/ExpenseList.aspx">--%>
+                                <i class="fas fa-money-bill-wave me-1"></i>Expenses
+                            </a>
+                        </li>
+
+                        <!-- Reports Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                <i class="fas fa-chart-line me-1"></i>Reports
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Purchases/PurchaseList.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Reports/ReportList.aspx">--%>
+                                    <i class="fas fa-home me-1"></i>Reports Dashboard</a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider" />
+                                </li>
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Reports/SalesReport.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Reports/SalesReport.aspx">--%>
+                                    <i class="fas fa-chart-bar me-1"></i>Sales Report</a>
+                                </li>
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Reports/ProfitLoss.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Reports/ProfitLoss.aspx">--%>
+                                    <i class="fas fa-file-invoice-dollar me-1"></i>Profit & Loss</a>
+                                </li>
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Reports/ExpenseReport.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Reports/ExpenseReport.aspx">--%>
+                                    <i class="fas fa-money-bill-wave me-1"></i>Expense Report</a>
+                                </li>
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Reports/CustomerReport.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Reports/CustomerReport.aspx">--%>
+                                    <i class="fas fa-users me-1"></i>Customer Report</a>
+                                </li>
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Reports/InventoryReport.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Reports/InventoryReport.aspx">--%>
+                                    <i class="fas fa-boxes me-1"></i>Inventory Report</a>
+                                </li>
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Reports/PaymentReport.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Reports/PaymentReport.aspx">--%>
+                                    <i class="fas fa-credit-card me-1"></i>Payment Report</a>
+                                </li>
+                                <!-- Add to Reports dropdown in MasterPage.master -->
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Reports/KitchenPerformanceReport.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Reports/KitchenPerformanceReport.aspx">--%>
+                                    <i class="fas fa-utensils me-1"></i>Kitchen Performance</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <!-- Right Side - User Menu -->
+                    <ul class="navbar-nav">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle me-1"></i>
+                                <asp:Literal ID="ltrUserName" runat="server" Text="User" />
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Settings/Profile.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Settings/Profile.aspx">--%>
+                                    <i class="fas fa-user me-1"></i>Profile</a>
+                                </li>
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Settings/ChangePassword.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Settings/ChangePassword.aspx">--%>
+                                    <i class="fas fa-key me-1"></i>Change Password</a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider" />
+                                </li>
+                                <li><a class="dropdown-item" href="<%= ResolveUrl("~/UI/Logout.aspx") %>">
+                                    <%--<li><a class="dropdown-item" href="Logout.aspx">--%>
+                                    <i class="fas fa-sign-out-alt me-1"></i>Logout</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- Navigation Bar -->
+        <%--  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="Dashboard.aspx">
+                    <i class="fas fa-utensils me-2"></i>RMS
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="Dashboard.aspx">
+                                <i class="fas fa-chart-pie me-1"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                <i class="fas fa-store me-1"></i>Management
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="Company/CompanyList.aspx"><i class="fas fa-building me-1"></i>Companies</a></li>
+                                <li><a class="dropdown-item" href="Branch/BranchList.aspx"><i class="fas fa-store-alt me-1"></i>Branches</a></li>
+                                <li><a class="dropdown-item" href="Users/UserList.aspx"><i class="fas fa-users me-1"></i>Users</a></li>
+                                <li><a class="dropdown-item" href="Roles/RoleList.aspx"><i class="fas fa-user-shield me-1"></i>Roles</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                <i class="fas fa-utensils me-1"></i>Menu
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="Menu/CategoryList.aspx"><i class="fas fa-list me-1"></i>Categories</a></li>
+                                <li><a class="dropdown-item" href="Menu/MenuList.aspx"><i class="fas fa-hamburger me-1"></i>Menu Items</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="POS/POS.aspx">
+                                <i class="fas fa-cash-register me-1"></i>POS
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="Orders/OrderList.aspx">
+                                <i class="fas fa-receipt me-1"></i>Orders
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="Kitchen/KitchenDisplay.aspx">
+                                <i class="fas fa-utensil-spoon me-1"></i>Kitchen
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                <i class="fas fa-chart-line me-1"></i>Reports
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="Reports/SalesReport.aspx"><i class="fas fa-chart-bar me-1"></i>Sales</a></li>
+                                <li><a class="dropdown-item" href="Reports/ExpenseReport.aspx"><i class="fas fa-money-bill-wave me-1"></i>Expenses</a></li>
+                                <li><a class="dropdown-item" href="Reports/ProfitLoss.aspx"><i class="fas fa-file-invoice me-1"></i>Profit & Loss</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle me-1"></i>
+                                <asp:Literal ID="ltrUserName" runat="server" Text="User" />
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="Settings/Profile.aspx"><i class="fas fa-user me-1"></i>Profile</a></li>
+                                <li><a class="dropdown-item" href="Settings/ChangePassword.aspx"><i class="fas fa-key me-1"></i>Change Password</a></li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li><a class="dropdown-item" href="Logout.aspx"><i class="fas fa-sign-out-alt me-1"></i>Logout</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>--%>
+
+        <!-- Main Content Area -->
+        <div class="container-fluid mt-3">
+            <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+        </div>
+
+        <!-- Toast Notification Container -->
+        <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+            <!-- Toasts will be dynamically added here -->
+        </div>
+        <!-- Footer -->
+        <footer class="footer mt-5 py-3 bg-light">
+            <div class="container text-center">
+                <span class="text-muted">© <%= DateTime.Now.Year %> Restaurant Management System. All rights reserved.</span>
+            </div>
+        </footer>
+
+        <!-- Bootstrap 5 JavaScript -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+        <!-- Custom JavaScript -->
+        <script src="~/Scripts/Site.js"></script>
+
+        <asp:ContentPlaceHolder ID="ScriptsContent" runat="server"></asp:ContentPlaceHolder>
+    </form>
+</body>
+</html>

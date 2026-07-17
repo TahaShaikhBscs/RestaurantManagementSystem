@@ -1,0 +1,74 @@
+﻿/* ============================================ */
+/* theme.css - Dynamic Theme Styles */
+/* This file is controlled by the Theme Engine */
+/* ============================================ */
+
+/* Theme variables will be injected dynamically */
+:root {
+    --primary-color: #667eea;
+    --secondary-color: #764ba2;
+    --accent-color: #f39c12;
+    --background-color: #ffffff;
+    --text-color: #333333;
+    --font-family: 'Poppins', sans-serif;
+    --border-radius: 10px;
+}
+
+/* Theme overrides - applied dynamically */
+.theme-primary {
+    color: var(--primary-color);
+}
+
+.theme-bg-primary {
+    background: var(--primary-color);
+}
+
+.theme-border-primary {
+    border-color: var(--primary-color);
+}
+
+/* Font overrides */
+.font-playfair {
+    font-family: 'Playfair Display', serif;
+}
+
+.font-poppins {
+    font-family: 'Poppins', sans-serif;
+}
+
+.font-roboto {
+    font-family: 'Roboto', sans-serif;
+}
+
+.font-open-sans {
+    font-family: 'Open Sans', sans-serif;
+}
+
+.font-lato {
+    font-family: 'Lato', sans-serif;
+}
+
+.font-montserrat {
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* Border radius overrides */
+.radius-0 {
+    border-radius: 0 !important;
+}
+
+.radius-5 {
+    border-radius: 5px !important;
+}
+
+.radius-10 {
+    border-radius: 10px !important;
+}
+
+.radius-20 {
+    border-radius: 20px !important;
+}
+
+.radius-50 {
+    border-radius: 50px !important;
+}
