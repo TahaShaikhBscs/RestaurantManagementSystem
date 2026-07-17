@@ -82,8 +82,8 @@
                 </div>
                 <div class="col-md-6 text-md-end">
                     <ul class="footer-bottom-links">
-                        <li><a href="PrivacyPolicy.aspx">Privacy Policy</a></li>
-                        <li><a href="Terms.aspx">Terms &amp; Conditions</a></li>
+                        <li><a href="#" aria-disabled="true">Privacy Policy</a></li>
+                        <li><a href="#" aria-disabled="true">Terms &amp; Conditions</a></li>
                     </ul>
                 </div>
             </div>

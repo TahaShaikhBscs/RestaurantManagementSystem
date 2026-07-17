@@ -57,7 +57,7 @@ namespace RestaurantManagementSystem.Utilities
         /// <returns>User ID or null if not logged in</returns>
         public static int? GetUserId()
         {
-            return Session[USER_ID_KEY] as int?;
+            return GetNullableInt(Session[USER_ID_KEY]);
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace RestaurantManagementSystem.Utilities
         /// <returns>Company ID or null if not logged in</returns>
         public static int? GetCompanyId()
         {
-            return Session[COMPANY_ID_KEY] as int?;
+            return GetNullableInt(Session[COMPANY_ID_KEY]);
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace RestaurantManagementSystem.Utilities
         /// <returns>Branch ID or null if not logged in</returns>
         public static int? GetBranchId()
         {
-            return Session[BRANCH_ID_KEY] as int?;
+            return GetNullableInt(Session[BRANCH_ID_KEY]);
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace RestaurantManagementSystem.Utilities
         /// <returns>Role ID or null if not logged in</returns>
         public static int? GetRoleId()
         {
-            return Session[ROLE_ID_KEY] as int?;
+            return GetNullableInt(Session[ROLE_ID_KEY]);
         }
 
         /// <summary>
@@ -123,11 +123,11 @@ namespace RestaurantManagementSystem.Utilities
             if (!IsLoggedIn())
                 return false;
 
-            DateTime? lastActivity = Session[LAST_ACTIVITY_KEY] as DateTime?;
+            DateTime? lastActivity = GetNullableDateTime(Session[LAST_ACTIVITY_KEY]);
             if (!lastActivity.HasValue)
                 return false;
 
-            int timeout = Session[SESSION_TIMEOUT_KEY] as int? ?? 30;
+            int timeout = GetNullableInt(Session[SESSION_TIMEOUT_KEY]) ?? 30;
             TimeSpan idleTime = DateTime.Now - lastActivity.Value;
 
             return idleTime.TotalMinutes <= timeout;
@@ -159,7 +159,49 @@ namespace RestaurantManagementSystem.Utilities
         /// <returns>Session timeout</returns>
         public static int GetSessionTimeout()
         {
-            return Session[SESSION_TIMEOUT_KEY] as int? ?? 30;
+            return GetNullableInt(Session[SESSION_TIMEOUT_KEY]) ?? 30;
+        }
+
+        private static int? GetNullableInt(object value)
+        {
+            if (value == null)
+                return null;
+
+            try
+            {
+                return Convert.ToInt32(value);
+            }
+            catch (FormatException)
+            {
+                return null;
+            }
+            catch (InvalidCastException)
+            {
+                return null;
+            }
+            catch (OverflowException)
+            {
+                return null;
+            }
+        }
+
+        private static DateTime? GetNullableDateTime(object value)
+        {
+            if (value == null)
+                return null;
+
+            try
+            {
+                return Convert.ToDateTime(value);
+            }
+            catch (FormatException)
+            {
+                return null;
+            }
+            catch (InvalidCastException)
+            {
+                return null;
+            }
         }
     }
 }
