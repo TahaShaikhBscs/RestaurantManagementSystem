@@ -4,6 +4,7 @@
 
 using System;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using RestaurantManagementSystem.Models;
 using RestaurantManagementSystem.BAL;
 
@@ -51,6 +52,31 @@ namespace RestaurantManagementSystem.UI
 
             // Check session timeout
             CheckSessionTimeout();
+        }
+
+        /// <summary>
+        /// Keeps file downloads as normal postbacks because an XMLHttpRequest cannot prompt a browser download.
+        /// </summary>
+        protected override void OnPreRender(EventArgs e)
+        {
+            RegisterExportControlsForFullPostback(MainContent);
+            base.OnPreRender(e);
+        }
+
+        private void RegisterExportControlsForFullPostback(Control parent)
+        {
+            foreach (Control control in parent.Controls)
+            {
+                Button button = control as Button;
+                if (button != null &&
+                    (button.ID.Equals("btnExport", StringComparison.OrdinalIgnoreCase) ||
+                     button.ID.EndsWith("Excel", StringComparison.OrdinalIgnoreCase)))
+                {
+                    ScriptManager.GetCurrent(Page).RegisterPostBackControl(button);
+                }
+
+                RegisterExportControlsForFullPostback(control);
+            }
         }
 
         /// <summary>

@@ -334,8 +334,21 @@
 
         <!-- Main Content Area -->
         <div class="container-fluid mt-3">
-            <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+            <asp:UpdatePanel ID="MainContentUpdatePanel" runat="server" UpdateMode="Conditional">
+                <ContentTemplate>
+                    <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+                </ContentTemplate>
+            </asp:UpdatePanel>
         </div>
+
+        <asp:UpdateProgress ID="MainContentUpdateProgress" runat="server" AssociatedUpdatePanelID="MainContentUpdatePanel" DisplayAfter="250">
+            <ProgressTemplate>
+                <div class="position-fixed top-50 start-50 translate-middle bg-white border rounded shadow px-3 py-2" style="z-index: 10000;">
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Updating...
+                </div>
+            </ProgressTemplate>
+        </asp:UpdateProgress>
 
         <!-- Toast Notification Container -->
         <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
@@ -355,6 +368,25 @@
 
         <!-- Custom JavaScript -->
         <script src="~/Scripts/Site.js"></script>
+
+        <script type="text/javascript">
+            (function () {
+                var requestManager = Sys.WebForms.PageRequestManager.getInstance();
+                requestManager.add_endRequest(function (sender, args) {
+                    var refresh = args.get_response().getResponseHeader("Refresh");
+                    if (!refresh) {
+                        return;
+                    }
+
+                    var match = /^\s*(\d+)\s*;\s*url\s*=\s*(.+)\s*$/i.exec(refresh);
+                    if (match) {
+                        window.setTimeout(function () {
+                            window.location.assign(match[2]);
+                        }, parseInt(match[1], 10) * 1000);
+                    }
+                });
+            }());
+        </script>
 
         <asp:ContentPlaceHolder ID="ScriptsContent" runat="server"></asp:ContentPlaceHolder>
     </form>
