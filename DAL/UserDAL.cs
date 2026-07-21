@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using RestaurantManagementSystem.Models;
+using RestaurantManagementSystem.Utilities;
 
 namespace RestaurantManagementSystem.DAL
 {
@@ -115,6 +116,27 @@ namespace RestaurantManagementSystem.DAL
 
                 return null;
             }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error getting user by username: {ex.Message}", ex);
+            }
+        }
+        public List<User> GetAllUser()
+        {
+
+            try
+            {
+                List<User> users = new List<User>();
+                DataTable dataTable = dbHelper.ExecuteStoredProcedure("sp_GetAllUser");
+
+                foreach (DataRow row in dataTable.Rows)
+                {
+                    users.Add(MapDataRowToUser(row));
+                }
+
+                return users;
+            }
+
             catch (Exception ex)
             {
                 throw new Exception($"Error getting user by username: {ex.Message}", ex);
@@ -330,30 +352,46 @@ namespace RestaurantManagementSystem.DAL
         {
             return new User
             {
-                UserID = Convert.ToInt32(row["UserID"]),
-                CompanyID = Convert.ToInt32(row["CompanyID"]),
-                BranchID = Convert.ToInt32(row["BranchID"]),
-                RoleID = Convert.ToInt32(row["RoleID"]),
-                Username = row["Username"].ToString(),
-                PasswordHash = row["PasswordHash"]?.ToString(),
-                PasswordSalt = row["PasswordSalt"]?.ToString(),
-                FullName = row["FullName"].ToString(),
-                Email = row["Email"]?.ToString(),
-                Phone = row["Phone"]?.ToString(),
-                ProfileImage = row["ProfileImage"]?.ToString(),
-                LastLoginDate = row["LastLoginDate"] != DBNull.Value ? Convert.ToDateTime(row["LastLoginDate"]) : (DateTime?)null,
-                SessionTimeout = Convert.ToInt32(row["SessionTimeout"]),
-                IsActive = Convert.ToBoolean(row["IsActive"]),
-                Status = Convert.ToBoolean(row["Status"]),
-                CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
-                UpdatedDate = Convert.ToDateTime(row["UpdatedDate"]),
-                CreatedBy = Convert.ToInt32(row["CreatedBy"]),
-                UpdatedBy = Convert.ToInt32(row["UpdatedBy"]),
-                IsDeleted = Convert.ToBoolean(row["IsDeleted"]),
+                UserID = row.GetInt("UserID"),
+                CompanyID = row.GetInt("CompanyID"),
+                BranchID = row.GetInt("BranchID"),
+                RoleID = row.GetInt("RoleID"),
+
+                Username = row.GetString("Username"),
+                PasswordHash = row.GetString("PasswordHash"),
+                PasswordSalt = row.GetString("PasswordSalt"),
+                FullName = row.GetString("FullName"),
+                Email = row.GetString("Email"),
+                Phone = row.GetString("Phone"),
+                ProfileImage = row.GetString("ProfileImage"),
+
+                LastLoginDate = row.GetNullableDateTime("LastLoginDate"),
+
+                SessionTimeout = row.GetInt("SessionTimeout"),
+
+                IsActive = row.GetBool("IsActive"),
+                Status = row.GetBool("Status"),
+
+                CreatedDate = row.GetDateTime("CreatedDate"),
+                UpdatedDate = row.GetDateTime("UpdatedDate"),
+
+                CreatedBy = row.GetInt("CreatedBy"),
+                UpdatedBy = row.GetInt("UpdatedBy"),
+
+                IsDeleted = row.GetBool("IsDeleted"),
+
                 // Additional properties from joins
-                RoleName = row.Table.Columns.Contains("RoleName") ? row["RoleName"]?.ToString() : null,
-                BranchName = row.Table.Columns.Contains("BranchName") ? row["BranchName"]?.ToString() : null,
-                CompanyName = row.Table.Columns.Contains("CompanyName") ? row["CompanyName"]?.ToString() : null
+                RoleName = row.Table.Columns.Contains("RoleName")
+                    ? row.GetString("RoleName")
+                    : null,
+
+                BranchName = row.Table.Columns.Contains("BranchName")
+                    ? row.GetString("BranchName")
+                    : null,
+
+                CompanyName = row.Table.Columns.Contains("CompanyName")
+                    ? row.GetString("CompanyName")
+                    : null
             };
         }
     }

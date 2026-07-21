@@ -1,28 +1,25 @@
 ﻿// ============================================
-// Models/Payment.cs - Updated for POS
+// Models/POS/POSPayment.cs
 // ============================================
 
 using System;
 
-namespace RestaurantManagementSystem.Models
+namespace RestaurantManagementSystem.Models.POS
 {
     /// <summary>
-    /// Payment Model - Represents a payment transaction
+    /// POS Payment Model
     /// </summary>
-    public class Payment
+    public class POSPayment
     {
-        #region Properties
-
         public int PaymentID { get; set; }
         public int CompanyID { get; set; }
         public int BranchID { get; set; }
         public int OrderID { get; set; }
         public int PaymentMethodID { get; set; }
-        public string PaymentMethod { get; set; } // Cash, Card, Online
         public decimal Amount { get; set; }
         public string ReferenceNumber { get; set; }
         public DateTime TransactionDate { get; set; }
-        public string PaymentStatus { get; set; } // Pending, Completed, Failed
+        public string PaymentStatus { get; set; }
         public bool IsRefund { get; set; }
         public decimal RefundAmount { get; set; }
         public DateTime? RefundDate { get; set; }
@@ -34,13 +31,8 @@ namespace RestaurantManagementSystem.Models
         public int UpdatedBy { get; set; }
         public bool IsDeleted { get; set; }
 
-        #endregion
-
-        #region Display Properties
-
+        // Display Properties
         public string PaymentMethodName { get; set; }
         public string PaymentMethodIcon { get; set; }
-
-        #endregion
     }
 }

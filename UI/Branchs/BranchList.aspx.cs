@@ -1,7 +1,4 @@
-﻿// ============================================
-// UI/Branch/BranchList.aspx.cs - Updated
-// ============================================
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Web.UI;

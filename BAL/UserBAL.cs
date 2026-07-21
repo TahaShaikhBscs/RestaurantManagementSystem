@@ -326,6 +326,10 @@ namespace RestaurantManagementSystem.BAL
             return userDAL.GetUserByUsername(username);
         }
 
+        public List<User> GetAllUser()
+        {
+            return userDAL.GetAllUser();
+        }
         /// <summary>
         /// Gets user by ID
         /// </summary>

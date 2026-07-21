@@ -105,6 +105,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\POS.css" />
+    <Content Include="Scripts\POS.js" />
     <Content Include="UI\Deals\DealsAddEdit.aspx" />
     <Content Include="UI\Deals\DealsList.aspx" />
     <Content Include="UI\Orders\OrderAddEdit.aspx" />
@@ -240,6 +242,7 @@
     <Compile Include="BAL\OfferBAL.cs" />
     <Compile Include="BAL\OrderBAL.cs" />
     <Compile Include="BAL\PaymentBAL.cs" />
+    <Compile Include="BAL\POSOrderBAL.cs" />
     <Compile Include="BAL\PurchaseBAL.cs" />
     <Compile Include="BAL\ReportBAL.cs" />
     <Compile Include="BAL\RoleBAL.cs" />
@@ -269,6 +272,7 @@
     <Compile Include="DAL\OfferDAL.cs" />
     <Compile Include="DAL\OrderDAL.cs" />
     <Compile Include="DAL\PaymentDAL.cs" />
+    <Compile Include="DAL\POSOrderDAL.cs" />
     <Compile Include="DAL\PurchaseDAL.cs" />
     <Compile Include="DAL\ReportDAL.cs" />
     <Compile Include="DAL\RoleDAL.cs" />
@@ -286,10 +290,12 @@
     <Compile Include="Models\AuditLog.cs" />
     <Compile Include="Models\BlogPost.cs" />
     <Compile Include="Models\Branch.cs" />
+    <Compile Include="Models\CashDrawer.cs" />
     <Compile Include="Models\Category.cs" />
     <Compile Include="Models\Chef.cs" />
     <Compile Include="Models\Company.cs" />
     <Compile Include="Models\ContactMessage.cs" />
+    <Compile Include="Models\Coupon.cs" />
     <Compile Include="Models\Customer.cs" />
     <Compile Include="Models\CustomerLoyalty.cs" />
     <Compile Include="Models\DashboardData.cs" />
@@ -301,11 +307,20 @@
     <Compile Include="Models\GalleryImage.cs" />
     <Compile Include="Models\Kitchen.cs" />
     <Compile Include="Models\MenuItem.cs" />
+    <Compile Include="Models\Modifier.cs" />
+    <Compile Include="Models\ModifierGroup.cs" />
     <Compile Include="Models\Offer.cs" />
     <Compile Include="Models\Order.cs" />
+    <Compile Include="Models\OrderCoupon.cs" />
     <Compile Include="Models\OrderItem.cs" />
+    <Compile Include="Models\OrderModifier.cs" />
+    <Compile Include="Models\OrderStatus.cs" />
     <Compile Include="Models\OrderTimeline.cs" />
     <Compile Include="Models\Payment.cs" />
+    <Compile Include="Models\PaymentMethod.cs" />
+    <Compile Include="Models\POSOrder.cs" />
+    <Compile Include="Models\POSOrderItem.cs" />
+    <Compile Include="Models\POSPayment.cs" />
     <Compile Include="Models\Purchase.cs" />
     <Compile Include="Models\Recipe.cs" />
     <Compile Include="Models\Reservation.cs" />
@@ -313,6 +328,7 @@
     <Compile Include="Models\Role.cs" />
     <Compile Include="Models\RolePermission.cs" />
     <Compile Include="Models\Settings.cs" />
+    <Compile Include="Models\Shift.cs" />
     <Compile Include="Models\Slider.cs" />
     <Compile Include="Models\Stock.cs" />
     <Compile Include="Models\StockTransaction.cs" />

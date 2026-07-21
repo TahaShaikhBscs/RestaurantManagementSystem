@@ -168,7 +168,7 @@
                             <i class="fas fa-toggle-on me-1 text-primary"></i>Status
                         </label>
                         <div class="card bg-light p-3">
-                            <div class="form-check form-switch">
+                            <div class="form-check">
                                 <asp:CheckBox ID="chkStatus" runat="server" CssClass="form-check-input" Checked="true" />
                                 <label class="form-check-label fw-bold" for="<%= chkStatus.ClientID %>">
                                     <asp:Literal ID="ltrStatusText" runat="server" Text="Active" />

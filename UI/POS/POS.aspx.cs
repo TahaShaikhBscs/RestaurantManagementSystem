@@ -1,5 +1,5 @@
 ﻿// ============================================
-// UI/POS/POS.aspx.cs
+// UI/POS/POS.aspx.cs - Enterprise POS Code Behind
 // ============================================
 
 using System;
@@ -11,33 +11,38 @@ using RestaurantManagementSystem.BAL;
 using RestaurantManagementSystem.Models;
 using RestaurantManagementSystem.Utilities;
 
-// Use model aliases to avoid namespace conflicts
-using MenuItemModel = RestaurantManagementSystem.Models.MenuItem;
-using OrderModel = RestaurantManagementSystem.Models.Order;
-using OrderItemModel = RestaurantManagementSystem.Models.OrderItem;
-using TableModel = RestaurantManagementSystem.Models.RestaurantTable;
-using CustomerModel = RestaurantManagementSystem.Models.Customer;
-
 namespace RestaurantManagementSystem.UI.POS
 {
     /// <summary>
-    /// Point of Sale Page - Handles order processing and billing
+    /// Enterprise Point of Sale Page - Server-Side Implementation
+    /// All business logic executes on the server via PostBack
     /// </summary>
     public partial class POS : Page
     {
+        #region Private Fields
+
+        private POSOrderBAL posOrderBAL;
+        private OrderBAL orderBAL;
         private MenuBAL menuBAL;
         private CategoryBAL categoryBAL;
         private TableBAL tableBAL;
-        private OrderBAL orderBAL;
         private CustomerBAL customerBAL;
+        private DealBAL dealBAL;
         private PaymentBAL paymentBAL;
         private AuditLogger auditLogger;
+        private int companyID;
+        private int branchID;
+        private int userID;
+        private const string MODULE_NAME = "POS";
 
+        // Cart stored in Session
         private List<CartItem> cartItems;
 
-        /// <summary>
-        /// Cart Item class for holding cart items
-        /// </summary>
+        #endregion
+
+        #region Cart Item Class
+
+        [Serializable]
         public class CartItem
         {
             public int MenuItemID { get; set; }
@@ -45,209 +50,388 @@ namespace RestaurantManagementSystem.UI.POS
             public int Quantity { get; set; }
             public decimal UnitPrice { get; set; }
             public decimal TotalPrice { get { return Quantity * UnitPrice; } }
+            public int? DealID { get; set; }
+            public string DealName { get; set; }
+            public bool IsDeal { get; set; }
+            public List<CartItem> DealItems { get; set; }
         }
+
+        #endregion
+
+        #region Page Events
 
         /// <summary>
         /// Page load event - initializes POS
         /// </summary>
-        //protected void Page_Load(object sender, EventArgs e)
-        //{
-        //    if (!SessionHelper.IsLoggedIn())
-        //    {
-        //        Response.Redirect("~/Login.aspx");
-        //        return;
-        //    }
-
-        //    menuBAL = new MenuBAL();
-        //    categoryBAL = new CategoryBAL();
-        //    tableBAL = new TableBAL();
-        //    orderBAL = new OrderBAL();
-        //    customerBAL = new CustomerBAL();
-        //    paymentBAL = new PaymentBAL();
-        //    auditLogger = new AuditLogger();
-
-        //    // Initialize cart from session
-        //    if (Session["POSCart"] == null)
-        //    {
-        //        cartItems = new List<CartItem>();
-        //        Session["POSCart"] = cartItems;
-        //    }
-        //    else
-        //    {
-        //        cartItems = (List<CartItem>)Session["POSCart"];
-        //    }
-
-        //    if (!IsPostBack)
-        //    {
-        //        LoadCategories();
-        //        LoadMenuItems();
-        //        LoadTables();
-        //        UpdateCartDisplay();
-        //        CalculateTotals();
-        //        hfOrderID.Value = "0";
-        //    }
-        //}
-        #region Page_Load - Initialize Deal Cart
-
         protected void Page_Load(object sender, EventArgs e)
         {
-            // ... existing code ...
-
-            // Initialize deal cart from session
-            if (Session["POSDealCart"] == null)
+            if (!SessionHelper.IsLoggedIn())
             {
-                dealCartItems = new List<DealCartItem>();
-                Session["POSDealCart"] = dealCartItems;
+                Response.Redirect("~/Login.aspx");
+                return;
+            }
+
+            InitializeComponents();
+
+            // Load cart from session
+            if (Session["POSCart"] == null)
+            {
+                cartItems = new List<CartItem>();
+                Session["POSCart"] = cartItems;
             }
             else
             {
-                dealCartItems = (List<DealCartItem>)Session["POSDealCart"];
+                cartItems = (List<CartItem>)Session["POSCart"];
             }
 
             if (!IsPostBack)
             {
-                // ... existing code ...
+                LoadCategories();
+                LoadMenuItems();
                 LoadDeals();
+                LoadTables();
+                LoadCustomers();
+                LoadPaymentMethods();
+                BindCartGrid();
+                CalculateTotals();
+                LoadShiftInfo();
             }
         }
 
         #endregion
 
+        #region Initialization
+
         /// <summary>
-        /// Loads categories for filter
+        /// Initializes all required components
+        /// </summary>
+        private void InitializeComponents()
+        {
+            posOrderBAL = new POSOrderBAL();
+            orderBAL = new OrderBAL();
+            menuBAL = new MenuBAL();
+            categoryBAL = new CategoryBAL();
+            tableBAL = new TableBAL();
+            customerBAL = new CustomerBAL();
+            dealBAL = new DealBAL();
+            paymentBAL = new PaymentBAL();
+            auditLogger = new AuditLogger();
+
+            var companyIDNullable = SessionHelper.GetCompanyId();
+            var branchIDNullable = SessionHelper.GetBranchId();
+            var userIDNullable = SessionHelper.GetUserId();
+
+            companyID = companyIDNullable ?? 0;
+            branchID = branchIDNullable ?? 0;
+            userID = userIDNullable ?? 0;
+
+            hfShiftID.Value = GetActiveShiftID().ToString();
+        }
+
+        #endregion
+
+        #region Data Loading
+
+        /// <summary>
+        /// Loads categories into the dropdown
         /// </summary>
         private void LoadCategories()
         {
             try
             {
-                int? branchID = SessionHelper.GetBranchId();
-                if (branchID.HasValue)
-                {
-                    List<Category> categories = categoryBAL.GetCategoriesByBranch(branchID.Value, false);
-                    ddlCategory.DataSource = categories;
-                    ddlCategory.DataTextField = "CategoryName";
-                    ddlCategory.DataValueField = "CategoryID";
-                    ddlCategory.DataBind();
-                    ddlCategory.Items.Insert(0, new ListItem("All Categories", ""));
-                }
+                var categories = categoryBAL.GetCategoriesByBranch(branchID, false);
+                ddlCategory.DataSource = categories;
+                ddlCategory.DataTextField = "CategoryName";
+                ddlCategory.DataValueField = "CategoryID";
+                ddlCategory.DataBind();
+                ddlCategory.Items.Insert(0, new ListItem("All Categories", ""));
             }
             catch (Exception ex)
             {
                 ShowErrorMessage($"Error loading categories: {ex.Message}");
+                auditLogger.LogAction("Error", MODULE_NAME, "LoadCategories", null, null, ex.Message);
             }
         }
 
         /// <summary>
-        /// Loads menu items for display
+        /// Loads menu items into the grid
         /// </summary>
         private void LoadMenuItems()
         {
             try
             {
-                int? branchID = SessionHelper.GetBranchId();
-                if (!branchID.HasValue)
-                {
-                    ShowErrorMessage("Branch not found in session.");
-                    return;
-                }
-
                 int? categoryID = null;
                 if (!string.IsNullOrEmpty(ddlCategory.SelectedValue))
                 {
                     categoryID = Convert.ToInt32(ddlCategory.SelectedValue);
                 }
 
-                List<MenuItemModel> items = menuBAL.GetMenuItemsByBranch(branchID.Value, categoryID, false);
+                var items = menuBAL.GetMenuItemsByBranch(branchID, categoryID, false);
+
+                // Apply search filter
+                string searchTerm = txtSearch.Text.Trim();
+                if (!string.IsNullOrEmpty(searchTerm))
+                {
+                    items = items.FindAll(i =>
+                        i.ItemName.ToLower().Contains(searchTerm.ToLower()) ||
+                        (i.SKU != null && i.SKU.ToLower().Contains(searchTerm.ToLower()))
+                    );
+                }
+
                 rptMenuItems.DataSource = items;
                 rptMenuItems.DataBind();
-                ltrItemCount.Text = items.Count.ToString();
+                pnlNoItems.Visible = items == null || items.Count == 0;
             }
             catch (Exception ex)
             {
                 ShowErrorMessage($"Error loading menu items: {ex.Message}");
+                auditLogger.LogAction("Error", MODULE_NAME, "LoadMenuItems", null, null, ex.Message);
             }
         }
 
         /// <summary>
-        /// Loads available tables for dine-in
+        /// Loads deals into the grid
+        /// </summary>
+        private void LoadDeals()
+        {
+            try
+            {
+                var deals = dealBAL.GetValidDeals(branchID);
+                rptDeals.DataSource = deals;
+                rptDeals.DataBind();
+
+                pnlNoDeals.Visible = deals == null || deals.Count == 0;
+            }
+            catch (Exception ex)
+            {
+                ShowErrorMessage($"Error loading deals: {ex.Message}");
+                auditLogger.LogAction("Error", MODULE_NAME, "LoadDeals", null, null, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Loads tables into the dropdown
         /// </summary>
         private void LoadTables()
         {
             try
             {
-                int? branchID = SessionHelper.GetBranchId();
-                if (branchID.HasValue)
-                {
-                    List<TableModel> tables = tableBAL.GetAvailableTables(branchID.Value);
-                    ddlTable.DataSource = tables;
-                    ddlTable.DataTextField = "TableNumber";
-                    ddlTable.DataValueField = "TableID";
-                    ddlTable.DataBind();
-                    ddlTable.Items.Insert(0, new ListItem("Select Table", ""));
-                }
+                var tables = tableBAL.GetAvailableTables(branchID);
+                ddlTable.DataSource = tables;
+                ddlTable.DataTextField = "TableNumber";
+                ddlTable.DataValueField = "TableID";
+                ddlTable.DataBind();
+                ddlTable.Items.Insert(0, new ListItem("Select Table", ""));
             }
             catch (Exception ex)
             {
                 ShowErrorMessage($"Error loading tables: {ex.Message}");
+                auditLogger.LogAction("Error", MODULE_NAME, "LoadTables", null, null, ex.Message);
             }
         }
 
         /// <summary>
-        /// Updates cart display
+        /// Loads customers into the dropdown
         /// </summary>
-        //private void UpdateCartDisplay()
-        //{
-        //    rptCart.DataSource = cartItems;
-        //    rptCart.DataBind();
-
-        //    pnlEmptyCart.Visible = (cartItems == null || cartItems.Count == 0);
-        //    rptCart.Visible = !pnlEmptyCart.Visible;
-        //}
-        #region Update Cart Display with Deals
+        private void LoadCustomers()
+        {
+            try
+            {
+                var customers = customerBAL.GetCustomersByBranch(branchID, false);
+                ddlCustomer.DataSource = customers;
+                ddlCustomer.DataTextField = "CustomerName";
+                ddlCustomer.DataValueField = "CustomerID";
+                ddlCustomer.DataBind();
+                ddlCustomer.Items.Insert(0, new ListItem("-- Walk-in --", ""));
+            }
+            catch (Exception ex)
+            {
+                ShowErrorMessage($"Error loading customers: {ex.Message}");
+                auditLogger.LogAction("Error", MODULE_NAME, "LoadCustomers", null, null, ex.Message);
+            }
+        }
 
         /// <summary>
-        /// Updated UpdateCartDisplay to show deals
+        /// Loads payment methods
         /// </summary>
-        private void UpdateCartDisplay()
+        private void LoadPaymentMethods()
         {
-            // Combine cart items and deal items for display
-            var displayItems = new List<object>();
+            // In a real implementation, load from database
+            ddlPaymentMethod.Items.Clear();
+            ddlPaymentMethod.Items.Add(new ListItem("-- Select Method --", ""));
+            ddlPaymentMethod.Items.Add(new ListItem("Cash", "Cash"));
+            ddlPaymentMethod.Items.Add(new ListItem("Credit Card", "Credit Card"));
+            ddlPaymentMethod.Items.Add(new ListItem("Debit Card", "Debit Card"));
+            ddlPaymentMethod.Items.Add(new ListItem("Online", "Online"));
+            ddlPaymentMethod.Items.Add(new ListItem("Mobile Wallet", "Mobile Wallet"));
+        }
 
-            foreach (var item in cartItems)
-            {
-                displayItems.Add(new
-                {
-                    Type = "Item",
-                    MenuItemID = item.MenuItemID,
-                    ItemName = item.ItemName,
-                    Quantity = item.Quantity,
-                    UnitPrice = item.UnitPrice,
-                    TotalPrice = item.TotalPrice,
-                    IsDeal = false
-                });
-            }
-
-            foreach (var deal in dealCartItems)
-            {
-                displayItems.Add(new
-                {
-                    Type = "Deal",
-                    DealID = deal.DealID,
-                    ItemName = deal.DealName + " (Combo)",
-                    Quantity = deal.Quantity,
-                    UnitPrice = deal.DealPrice,
-                    TotalPrice = deal.TotalPrice,
-                    IsDeal = true,
-                    DealItems = deal.Items
-                });
-            }
-
-            // Bind to repeater
-            rptCart.DataSource = displayItems;
-            rptCart.DataBind();
+        /// <summary>
+        /// Loads shift information
+        /// </summary>
+        private void LoadShiftInfo()
+        {
+            // In a real implementation, get active shift
+            hfShiftID.Value = "1";
         }
 
         #endregion
+
+        #region Cart Management
+
+        /// <summary>
+        /// Binds cart grid view
+        /// </summary>
+        private void BindCartGrid()
+        {
+            gvCart.DataSource = cartItems;
+            gvCart.DataBind();
+        }
+
+        /// <summary>
+        /// Adds an item to the cart
+        /// </summary>
+        private void AddItemToCart(int menuItemID)
+        {
+            var menuItem = menuBAL.GetMenuItemById(menuItemID);
+            if (menuItem != null && menuItem.IsAvailable)
+            {
+                var existing = cartItems.Find(c => c.MenuItemID == menuItemID && !c.IsDeal);
+                if (existing != null)
+                {
+                    existing.Quantity++;
+                }
+                else
+                {
+                    cartItems.Add(new CartItem
+                    {
+                        MenuItemID = menuItemID,
+                        ItemName = menuItem.ItemName,
+                        Quantity = 1,
+                        UnitPrice = menuItem.Price,
+                        IsDeal = false
+                    });
+                }
+
+                Session["POSCart"] = cartItems;
+                BindCartGrid();
+                CalculateTotals();
+                ShowSuccessMessage($"{menuItem.ItemName} added to cart.");
+            }
+            else
+            {
+                ShowErrorMessage("Item is not available.");
+            }
+        }
+
+        /// <summary>
+        /// Adds a deal to the cart
+        /// </summary>
+        private void AddDealToCart(int dealID)
+        {
+            var deal = dealBAL.GetDealWithItems(dealID);
+            if (deal != null && deal.IsValid)
+            {
+                // Check if deal already in cart
+                var existing = cartItems.Find(c => c.DealID == dealID && c.IsDeal);
+                if (existing != null)
+                {
+                    existing.Quantity++;
+                }
+                else
+                {
+                    var dealItem = new CartItem
+                    {
+                        DealID = dealID,
+                        DealName = deal.DealName,
+                        Quantity = 1,
+                        UnitPrice = deal.DealPrice,
+                        IsDeal = true,
+                        DealItems = new List<CartItem>()
+                    };
+
+                    // Add individual items from deal
+                    foreach (var item in deal.DealItems)
+                    {
+                        dealItem.DealItems.Add(new CartItem
+                        {
+                            MenuItemID = item.MenuItemID,
+                            ItemName = item.ItemName,
+                            Quantity = item.Quantity,
+                            UnitPrice = item.Price,
+                            IsDeal = false
+                        });
+                    }
+
+                    cartItems.Add(dealItem);
+                }
+
+                Session["POSCart"] = cartItems;
+                BindCartGrid();
+                CalculateTotals();
+                ShowSuccessMessage($"Deal '{deal.DealName}' added to cart.");
+            }
+            else
+            {
+                ShowErrorMessage("Deal is not available.");
+            }
+        }
+
+        /// <summary>
+        /// Updates item quantity in cart
+        /// </summary>
+        private void UpdateCartItemQuantity(int index, int change)
+        {
+            if (index >= 0 && index < cartItems.Count)
+            {
+                int newQty = cartItems[index].Quantity + change;
+                if (newQty <= 0)
+                {
+                    cartItems.RemoveAt(index);
+                }
+                else
+                {
+                    cartItems[index].Quantity = newQty;
+                }
+
+                Session["POSCart"] = cartItems;
+                BindCartGrid();
+                CalculateTotals();
+            }
+        }
+
+        /// <summary>
+        /// Removes an item from cart
+        /// </summary>
+        private void RemoveCartItem(int index)
+        {
+            if (index >= 0 && index < cartItems.Count)
+            {
+                string itemName = cartItems[index].ItemName;
+                cartItems.RemoveAt(index);
+
+                Session["POSCart"] = cartItems;
+                BindCartGrid();
+                CalculateTotals();
+                ShowSuccessMessage($"{itemName} removed from cart.");
+            }
+        }
+
+        /// <summary>
+        /// Clears the entire cart
+        /// </summary>
+        private void ClearCart()
+        {
+            cartItems.Clear();
+            Session["POSCart"] = cartItems;
+            BindCartGrid();
+            CalculateTotals();
+            ShowSuccessMessage("Cart cleared.");
+        }
+
+        #endregion
+
+        #region Calculations
 
         /// <summary>
         /// Calculates and displays totals
@@ -261,17 +445,32 @@ namespace RestaurantManagementSystem.UI.POS
             }
 
             decimal tax = subTotal * 0.05m; // 5% tax
-            decimal discount = 0; // Calculate discount if any
-            decimal total = subTotal + tax - discount;
+            decimal discount = 0;
+            decimal serviceCharge = 0;
 
-            ltrSubTotal.Text = subTotal.ToString("N2");
-            ltrTax.Text = tax.ToString("N2");
-            ltrDiscount.Text = discount.ToString("N2");
-            ltrTotal.Text = total.ToString("N2");
+            decimal.TryParse(txtDiscount.Text, out discount);
+            decimal.TryParse(txtServiceCharge.Text, out serviceCharge);
+
+            decimal total = subTotal + tax - discount + serviceCharge;
+
+            ltrSubTotal.Text = $"${subTotal:F2}";
+            ltrTax.Text = $"${tax:F2}";
+            ltrTotal.Text = $"${total:F2}";
+
+            // Update payment modal totals
+            ltrPaymentTotal.Text = $"${total:F2}";
+
+            // Bind payment items
+            gvPaymentItems.DataSource = cartItems;
+            gvPaymentItems.DataBind();
         }
 
+        #endregion
+
+        #region Button Events
+
         /// <summary>
-        /// Handles category filter change
+        /// Handles category selection change
         /// </summary>
         protected void ddlCategory_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -283,473 +482,413 @@ namespace RestaurantManagementSystem.UI.POS
         /// </summary>
         protected void txtSearch_TextChanged(object sender, EventArgs e)
         {
-            try
-            {
-                string searchTerm = txtSearch.Text.Trim();
-                int? branchID = SessionHelper.GetBranchId();
+            LoadMenuItems();
+        }
 
-                if (branchID.HasValue && !string.IsNullOrEmpty(searchTerm))
-                {
-                    List<MenuItemModel> items = menuBAL.SearchMenuItems(branchID.Value, searchTerm);
-                    rptMenuItems.DataSource = items;
-                    rptMenuItems.DataBind();
-                    ltrItemCount.Text = items.Count.ToString();
-                }
-                else
-                {
-                    LoadMenuItems();
-                }
-            }
-            catch (Exception ex)
+        /// <summary>
+        /// Handles refresh menu button click
+        /// </summary>
+        protected void btnRefreshMenu_Click(object sender, EventArgs e)
+        {
+            LoadMenuItems();
+            LoadDeals();
+            ShowSuccessMessage("Menu refreshed.");
+        }
+
+        /// <summary>
+        /// Handles order type change
+        /// </summary>
+        protected void ddlOrderType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string orderType = ddlOrderType.SelectedValue;
+            if (orderType == "Delivery")
             {
-                ShowErrorMessage($"Error searching items: {ex.Message}");
+                divDeliveryAddress.Style["display"] = "block";
+            }
+            else
+            {
+                divDeliveryAddress.Style["display"] = "none";
             }
         }
 
         /// <summary>
-        /// Handles menu item click - adds to cart
+        /// Handles menu item add
         /// </summary>
         protected void rptMenuItems_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
-            try
-            {
-                if (e.CommandName == "Add")
-                {
-                    int menuItemID = Convert.ToInt32(e.CommandArgument);
-
-                    // Get item details
-                    MenuItemModel item = menuBAL.GetMenuItemById(menuItemID);
-                    if (item != null && item.IsAvailable)
-                    {
-                        // Check if item already in cart
-                        var existing = cartItems.Find(c => c.MenuItemID == menuItemID);
-                        if (existing != null)
-                        {
-                            existing.Quantity++;
-                        }
-                        else
-                        {
-                            cartItems.Add(new CartItem
-                            {
-                                MenuItemID = menuItemID,
-                                ItemName = item.ItemName,
-                                Quantity = 1,
-                                UnitPrice = item.Price
-                            });
-                        }
-
-                        Session["POSCart"] = cartItems;
-                        UpdateCartDisplay();
-                        CalculateTotals();
-                        ShowSuccessMessage($"{item.ItemName} added to cart.");
-                    }
-                    else
-                    {
-                        ShowErrorMessage("Item is not available.");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                ShowErrorMessage($"Error adding item: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Handles cart item commands (add/remove)
-        /// </summary>
-        protected void rptCart_ItemCommand(object source, RepeaterCommandEventArgs e)
-        {
-            try
+            if (e.CommandName == "AddItem")
             {
                 int menuItemID = Convert.ToInt32(e.CommandArgument);
-
-                if (e.CommandName == "RemoveItem")
-                {
-                    var item = cartItems.Find(c => c.MenuItemID == menuItemID);
-                    if (item != null)
-                    {
-                        if (item.Quantity > 1)
-                        {
-                            item.Quantity--;
-                        }
-                        else
-                        {
-                            cartItems.Remove(item);
-                        }
-                        Session["POSCart"] = cartItems;
-                        UpdateCartDisplay();
-                        CalculateTotals();
-                    }
-                }
-                else if (e.CommandName == "AddItem")
-                {
-                    var item = cartItems.Find(c => c.MenuItemID == menuItemID);
-                    if (item != null)
-                    {
-                        item.Quantity++;
-                        Session["POSCart"] = cartItems;
-                        UpdateCartDisplay();
-                        CalculateTotals();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                ShowErrorMessage($"Error updating cart: {ex.Message}");
+                AddItemToCart(menuItemID);
             }
         }
 
         /// <summary>
-        /// Clears the cart
+        /// Handles deal add
+        /// </summary>
+        protected void rptDeals_ItemCommand(object source, RepeaterCommandEventArgs e)
+        {
+            if (e.CommandName == "AddDeal")
+            {
+                int dealID = Convert.ToInt32(e.CommandArgument);
+                AddDealToCart(dealID);
+            }
+        }
+
+        /// <summary>
+        /// Handles cart grid commands
+        /// </summary>
+        protected void gvCart_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            int index = Convert.ToInt32(e.CommandArgument);
+
+            switch (e.CommandName)
+            {
+                case "IncreaseQty":
+                    UpdateCartItemQuantity(index, 1);
+                    break;
+                case "DecreaseQty":
+                    UpdateCartItemQuantity(index, -1);
+                    break;
+                case "RemoveItem":
+                    RemoveCartItem(index);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Handles clear cart button click
         /// </summary>
         protected void btnClearCart_Click(object sender, EventArgs e)
         {
-            cartItems.Clear();
-            Session["POSCart"] = cartItems;
-            UpdateCartDisplay();
-            CalculateTotals();
-            ShowSuccessMessage("Cart cleared.");
+            ClearCart();
         }
 
         /// <summary>
-        /// Finds customer by phone number
+        /// Handles discount text change
         /// </summary>
-        protected void btnFindCustomer_Click(object sender, EventArgs e)
+        protected void txtDiscount_TextChanged(object sender, EventArgs e)
         {
+            CalculateTotals();
+        }
+
+        /// <summary>
+        /// Handles service charge text change
+        /// </summary>
+        protected void txtServiceCharge_TextChanged(object sender, EventArgs e)
+        {
+            CalculateTotals();
+        }
+
+        /// <summary>
+        /// Handles hold order button click
+        /// </summary>
+        protected void btnHold_Click(object sender, EventArgs e)
+        {
+            if (cartItems.Count == 0)
+            {
+                ShowErrorMessage("Cart is empty. Cannot hold order.");
+                return;
+            }
+
+            // In a real implementation, save as held order
+            ShowSuccessMessage("Order held successfully.");
+            ClearCart();
+        }
+
+        /// <summary>
+        /// Handles void order button click
+        /// </summary>
+        protected void btnVoid_Click(object sender, EventArgs e)
+        {
+            if (cartItems.Count == 0)
+            {
+                ShowErrorMessage("Cart is empty. Cannot void order.");
+                return;
+            }
+
+            // In a real implementation, void the order
+            ShowSuccessMessage("Order voided successfully.");
+            ClearCart();
+        }
+
+        /// <summary>
+        /// Handles send to kitchen button click
+        /// </summary>
+        protected void btnSendKitchen_Click(object sender, EventArgs e)
+        {
+            if (cartItems.Count == 0)
+            {
+                ShowErrorMessage("Cart is empty. Cannot send to kitchen.");
+                return;
+            }
+
             try
             {
-                string phone = txtCustomer.Text.Trim();
-                if (!string.IsNullOrEmpty(phone))
+                // Create order
+                Order order = CreateOrderFromCart();
+                List<OrderItem> items = CreateOrderItemsFromCart();
+
+                int orderID = posOrderBAL.CreateOrder(order, items);
+
+                if (orderID > 0)
                 {
-                    int? branchID = SessionHelper.GetBranchId();
-                    if (branchID.HasValue)
+                    // Send to kitchen
+                    bool sent = posOrderBAL.SendToKitchen(orderID, userID);
+                    if (sent)
                     {
-                        CustomerModel customer = customerBAL.GetCustomerByPhone(phone, branchID.Value);
-                        if (customer != null)
-                        {
-                            txtCustomer.Text = customer.CustomerName;
-                            ShowSuccessMessage($"Customer found: {customer.CustomerName}");
-                        }
-                        else
-                        {
-                            ShowErrorMessage("Customer not found.");
-                        }
+                        hfOrderID.Value = orderID.ToString();
+                        ShowSuccessMessage($"Order #{order.OrderNumber} sent to kitchen.");
+                        ClearCart();
                     }
+                    else
+                    {
+                        ShowErrorMessage("Failed to send order to kitchen.");
+                    }
+                }
+                else
+                {
+                    ShowErrorMessage("Failed to create order.");
                 }
             }
             catch (Exception ex)
             {
-                ShowErrorMessage($"Error finding customer: {ex.Message}");
+                ShowErrorMessage($"Error: {ex.Message}");
+                auditLogger.LogAction("Error", MODULE_NAME, "SendToKitchen", null, null, ex.Message);
             }
         }
 
         /// <summary>
-        /// Processes the order
+        /// Handles payment button click - shows payment modal
         /// </summary>
-        protected void btnProcessOrder_Click(object sender, EventArgs e)
+        protected void btnPayment_Click(object sender, EventArgs e)
+        {
+            if (cartItems.Count == 0)
+            {
+                ShowErrorMessage("Cart is empty. Cannot process payment.");
+                return;
+            }
+
+            // Update payment modal
+            CalculateTotals();
+            txtPaidAmount.Text = "0.00";
+            txtChange.Text = "0.00";
+
+            // Show modal
+            string script = "var modal = new bootstrap.Modal(document.getElementById('paymentModal')); modal.show();";
+            ClientScript.RegisterStartupScript(this.GetType(), "ShowPaymentModal", script, true);
+        }
+
+        /// <summary>
+        /// Handles paid amount change
+        /// </summary>
+        protected void txtPaidAmount_TextChanged(object sender, EventArgs e)
+        {
+            decimal total = 0;
+            decimal paid = 0;
+            decimal.TryParse(ltrTotal.Text.Replace("$", ""), out total);
+            decimal.TryParse(txtPaidAmount.Text, out paid);
+
+            decimal change = paid - total;
+            txtChange.Text = change >= 0 ? change.ToString("F2") : "0.00";
+        }
+
+        /// <summary>
+        /// Handles confirm payment button click
+        /// </summary>
+        protected void btnConfirmPayment_Click(object sender, EventArgs e)
         {
             try
             {
-                if (cartItems.Count == 0 && dealCartItems.Count == 0)
+                if (string.IsNullOrEmpty(ddlPaymentMethod.SelectedValue))
                 {
-                    ShowErrorMessage("Cart is empty. Please add items first.");
+                    ShowErrorMessage("Please select a payment method.");
                     return;
                 }
 
-                int? userID = SessionHelper.GetUserId();
-                if (!userID.HasValue)
+                decimal total = 0;
+                decimal paid = 0;
+                decimal.TryParse(ltrTotal.Text.Replace("$", ""), out total);
+                decimal.TryParse(txtPaidAmount.Text, out paid);
+
+                if (paid < total)
                 {
-                    ShowErrorMessage("User session expired. Please login again.");
+                    ShowErrorMessage("Insufficient payment amount.");
                     return;
                 }
 
-                int? companyID = SessionHelper.GetCompanyId();
-                int? branchID = SessionHelper.GetBranchId();
-
-                if (!companyID.HasValue || !branchID.HasValue)
+                // Create order if not already created
+                int orderID = Convert.ToInt32(hfOrderID.Value);
+                if (orderID == 0)
                 {
-                    ShowErrorMessage("Company or branch not found in session.");
-                    return;
+                    Order order = CreateOrderFromCart();
+                    List<OrderItem> items = CreateOrderItemsFromCart();
+
+                    orderID = posOrderBAL.CreateOrder(order, items);
+                    hfOrderID.Value = orderID.ToString();
                 }
-
-                // Get order details
-                string orderType = ddlOrderType.SelectedValue;
-                int? tableID = null;
-                if (!string.IsNullOrEmpty(ddlTable.SelectedValue))
-                {
-                    tableID = Convert.ToInt32(ddlTable.SelectedValue);
-                }
-
-                string customerName = txtCustomer.Text.Trim();
-                int? customerID = null;
-
-                // Create order items from both regular items and deals
-                List<OrderItem> orderItems = new List<OrderItem>();
-
-                // Add regular cart items
-                foreach (var cartItem in cartItems)
-                {
-                    orderItems.Add(new OrderItem
-                    {
-                        MenuItemID = cartItem.MenuItemID,
-                        Quantity = cartItem.Quantity,
-                        UnitPrice = cartItem.UnitPrice,
-                        Discount = 0,
-                        TotalPrice = cartItem.TotalPrice,
-                        KitchenStatus = "Pending",
-                        CreatedBy = userID.Value
-                    });
-                }
-
-                // Add deal items (each menu item from the deal)
-                foreach (var deal in dealCartItems)
-                {
-                    foreach (var item in deal.Items)
-                    {
-                        orderItems.Add(new OrderItem
-                        {
-                            MenuItemID = item.MenuItemID,
-                            Quantity = item.Quantity * deal.Quantity,
-                            UnitPrice = item.UnitPrice,
-                            Discount = 0,
-                            TotalPrice = item.TotalPrice * deal.Quantity,
-                            KitchenStatus = "Pending",
-                            CreatedBy = userID.Value
-                        });
-                    }
-                }
-
-                // Calculate totals
-                decimal subTotal = 0;
-                foreach (var item in orderItems)
-                {
-                    subTotal += item.TotalPrice;
-                }
-
-                // Apply deal discounts (the deal price is already discounted)
-                decimal dealTotal = 0;
-                foreach (var deal in dealCartItems)
-                {
-                    dealTotal += deal.TotalPrice;
-                }
-
-                decimal totalAmount = subTotal - (subTotal - dealTotal);
-
-                // Create order
-                OrderModel order = new OrderModel
-                {
-                    CompanyID = companyID.Value,
-                    BranchID = branchID.Value,
-                    TableID = tableID,
-                    CustomerID = customerID,
-                    OrderType = orderType,
-                    OrderStatus = "Pending",
-                    PaymentStatus = "Pending",
-                    SubTotal = subTotal,
-                    Tax = 0,
-                    Discount = subTotal - totalAmount,
-                    TotalAmount = totalAmount,
-                    OrderSource = "POS",
-                    CreatedBy = userID.Value
-                };
-
-                // Save order
-                int orderID = orderBAL.CreateOrder(order, orderItems);
 
                 if (orderID > 0)
                 {
                     // Process payment
-                    decimal paidAmount = Convert.ToDecimal(txtPaidAmount.Text);
-                    if (paidAmount > 0)
+                    Payment payment = new Payment
                     {
-                        Payment payment = new Payment
-                        {
-                            CompanyID = companyID.Value,
-                            BranchID = branchID.Value,
-                            OrderID = orderID,
-                            PaymentMethod = ddlPaymentMethod.SelectedValue,
-                            Amount = paidAmount,
-                            PaymentStatus = paidAmount >= totalAmount ? "Completed" : "Partial",
-                            CreatedBy = userID.Value
-                        };
-                        paymentBAL.ProcessPayment(payment);
+                        CompanyID = companyID,
+                        BranchID = branchID,
+                        OrderID = orderID,
+                        PaymentMethod = ddlPaymentMethod.SelectedValue,
+                        Amount = paid,
+                        ReferenceNumber = txtReference.Text.Trim(),
+                        PaymentStatus = "Completed",
+                        CreatedBy = userID
+                    };
+
+                    bool processed = posOrderBAL.ProcessPayment(payment);
+                    if (processed)
+                    {
+                        // Update order status to Completed
+                        posOrderBAL.UpdateOrderStatus(orderID, "Completed", userID);
+
+                        ShowSuccessMessage($"Payment processed successfully. Order #{orderID}");
+                        ClearCart();
+                        hfOrderID.Value = "0";
+
+                        // Close modal
+                        string closeScript = "var modal = bootstrap.Modal.getInstance(document.getElementById('paymentModal')); modal.hide();";
+                        ClientScript.RegisterStartupScript(this.GetType(), "ClosePaymentModal", closeScript, true);
                     }
-
-                    auditLogger.LogInsert("OrderManagement", "Orders", orderID,
-                        $"OrderNumber: {order.OrderNumber}, Type: {orderType}, Total: {order.TotalAmount}");
-
-                    ShowSuccessMessage($"Order #{order.OrderNumber} processed successfully!");
-
-                    // Clear cart
-                    cartItems.Clear();
-                    dealCartItems.Clear();
-                    Session["POSCart"] = cartItems;
-                    Session["POSDealCart"] = dealCartItems;
-                    UpdateCartDisplay();
-                    CalculateTotals();
-                    txtCustomer.Text = "Walk-in";
-                    txtPaidAmount.Text = "0.00";
-                    hfOrderID.Value = "0";
+                    else
+                    {
+                        ShowErrorMessage("Failed to process payment.");
+                    }
                 }
                 else
                 {
-                    ShowErrorMessage("Failed to process order.");
+                    ShowErrorMessage("Failed to create order.");
                 }
             }
             catch (Exception ex)
             {
-                ShowErrorMessage($"Error processing order: {ex.Message}");
-                auditLogger.LogAction("Error", "POS", "ProcessOrder", null, null, ex.Message);
+                ShowErrorMessage($"Error processing payment: {ex.Message}");
+                auditLogger.LogAction("Error", MODULE_NAME, "ConfirmPayment", null, null, ex.Message);
             }
         }
-        //protected void btnProcessOrder_Click(object sender, EventArgs e)
-        //{
-        //    try
-        //    {
-        //        if (cartItems.Count == 0)
-        //        {
-        //            ShowErrorMessage("Cart is empty. Please add items first.");
-        //            return;
-        //        }
 
-        //        int? userID = SessionHelper.GetUserId();
-        //        if (!userID.HasValue)
-        //        {
-        //            ShowErrorMessage("User session expired. Please login again.");
-        //            return;
-        //        }
+        #endregion
 
-        //        int? companyID = SessionHelper.GetCompanyId();
-        //        int? branchID = SessionHelper.GetBranchId();
-
-        //        if (!companyID.HasValue || !branchID.HasValue)
-        //        {
-        //            ShowErrorMessage("Company or branch not found in session.");
-        //            return;
-        //        }
-
-        //        // Get order details
-        //        string orderType = ddlOrderType.SelectedValue;
-        //        int? tableID = null;
-        //        if (!string.IsNullOrEmpty(ddlTable.SelectedValue))
-        //        {
-        //            tableID = Convert.ToInt32(ddlTable.SelectedValue);
-        //        }
-
-        //        string customerName = txtCustomer.Text.Trim();
-        //        int? customerID = null;
-
-        //        // Find or create customer
-        //        if (!string.IsNullOrEmpty(customerName) && customerName != "Walk-in")
-        //        {
-        //            // Check if customer exists by name (simplified)
-        //            // In real implementation, you would search by phone or email
-        //            customerID = null; // Placeholder
-        //        }
-
-        //        // Create order
-        //        OrderModel order = new OrderModel
-        //        {
-        //            CompanyID = companyID.Value,
-        //            BranchID = branchID.Value,
-        //            TableID = tableID,
-        //            CustomerID = customerID,
-        //            OrderType = orderType,
-        //            OrderStatus = "Pending",
-        //            PaymentStatus = "Pending",
-        //            OrderSource = "POS",
-        //            CreatedBy = userID.Value
-        //        };
-
-        //        List<OrderItemModel> items = new List<OrderItemModel>();
-        //        foreach (var cartItem in cartItems)
-        //        {
-        //            items.Add(new OrderItemModel
-        //            {
-        //                MenuItemID = cartItem.MenuItemID,
-        //                Quantity = cartItem.Quantity,
-        //                UnitPrice = cartItem.UnitPrice,
-        //                Discount = 0,
-        //                TotalPrice = cartItem.TotalPrice,
-        //                KitchenStatus = "Pending",
-        //                CreatedBy = userID.Value
-        //            });
-        //        }
-
-        //        // Save order
-        //        int orderID = orderBAL.CreateOrder(order, items);
-
-        //        if (orderID > 0)
-        //        {
-        //            // Process payment
-        //            decimal paidAmount = Convert.ToDecimal(txtPaidAmount.Text);
-        //            if (paidAmount > 0)
-        //            {
-        //                Payment payment = new Payment
-        //                {
-        //                    CompanyID = companyID.Value,
-        //                    BranchID = branchID.Value,
-        //                    OrderID = orderID,
-        //                    PaymentMethod = ddlPaymentMethod.SelectedValue,
-        //                    Amount = paidAmount,
-        //                    PaymentStatus = paidAmount >= order.TotalAmount ? "Completed" : "Partial",
-        //                    CreatedBy = userID.Value
-        //                };
-        //                paymentBAL.ProcessPayment(payment);
-        //            }
-
-        //            auditLogger.LogInsert("OrderManagement", "Orders", orderID,
-        //                $"OrderNumber: {order.OrderNumber}, Type: {orderType}, Total: {order.TotalAmount}");
-
-        //            ShowSuccessMessage($"Order #{order.OrderNumber} processed successfully!");
-
-        //            // Clear cart
-        //            cartItems.Clear();
-        //            Session["POSCart"] = cartItems;
-        //            UpdateCartDisplay();
-        //            CalculateTotals();
-        //            hfOrderID.Value = "0";
-        //            txtCustomer.Text = "Walk-in";
-        //            txtPaidAmount.Text = "0.00";
-        //        }
-        //        else
-        //        {
-        //            ShowErrorMessage("Failed to process order.");
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        ShowErrorMessage($"Error processing order: {ex.Message}");
-        //        auditLogger.LogAction("Error", "POS", "ProcessOrder", null, null, ex.Message);
-        //    }
-        //}
+        #region Helper Methods
 
         /// <summary>
-        /// Holds the order for later
+        /// Creates an Order object from cart items
         /// </summary>
-        protected void btnHoldOrder_Click(object sender, EventArgs e)
+        private Order CreateOrderFromCart()
         {
-            // In a real implementation, you would save the order as "Held"
-            // and store it in a held orders list
-            ShowSuccessMessage("Order held successfully. You can resume it from the Orders list.");
+            decimal subTotal = 0;
+            foreach (var item in cartItems)
+            {
+                subTotal += item.TotalPrice;
+            }
+
+            decimal tax = subTotal * 0.05m;
+            decimal discount = 0;
+            decimal serviceCharge = 0;
+            decimal.TryParse(txtDiscount.Text, out discount);
+            decimal.TryParse(txtServiceCharge.Text, out serviceCharge);
+            decimal total = subTotal + tax - discount + serviceCharge;
+
+            int? customerID = null;
+            if (!string.IsNullOrEmpty(ddlCustomer.SelectedValue))
+            {
+                customerID = Convert.ToInt32(ddlCustomer.SelectedValue);
+            }
+
+            int? tableID = null;
+            if (ddlOrderType.SelectedValue == "Dine In" && !string.IsNullOrEmpty(ddlTable.SelectedValue))
+            {
+                tableID = Convert.ToInt32(ddlTable.SelectedValue);
+            }
+
+            return new Order
+            {
+                CompanyID = companyID,
+                BranchID = branchID,
+                TableID = tableID,
+                CustomerID = customerID,
+                OrderType = ddlOrderType.SelectedValue,
+                OrderStatus = "Pending",
+                PaymentStatus = "Pending",
+                SubTotal = subTotal,
+                Tax = tax,
+                Discount = discount,
+                ServiceCharge = serviceCharge,
+                TotalAmount = total,
+                DeliveryAddress = txtDeliveryAddress.Text.Trim(),
+                SpecialInstructions = txtSpecialInstructions.Text.Trim(),
+                OrderSource = "POS",
+                ShiftID = Convert.ToInt32(hfShiftID.Value),
+                CreatedBy = userID
+            };
         }
 
         /// <summary>
-        /// Starts a new order
+        /// Creates OrderItem list from cart items
         /// </summary>
-        protected void btnNewOrder_Click(object sender, EventArgs e)
+        private List<OrderItem> CreateOrderItemsFromCart()
         {
-            cartItems.Clear();
-            Session["POSCart"] = cartItems;
-            UpdateCartDisplay();
-            CalculateTotals();
-            txtCustomer.Text = "Walk-in";
-            txtPaidAmount.Text = "0.00";
-            hfOrderID.Value = "0";
-            ShowSuccessMessage("New order started.");
+            var items = new List<OrderItem>();
+
+            foreach (var cartItem in cartItems)
+            {
+                if (cartItem.IsDeal)
+                {
+                    // Expand deal items
+                    foreach (var dealItem in cartItem.DealItems)
+                    {
+                        items.Add(new OrderItem
+                        {
+                            MenuItemID = dealItem.MenuItemID,
+                            DealID = cartItem.DealID,
+                            Quantity = dealItem.Quantity * cartItem.Quantity,
+                            UnitPrice = dealItem.UnitPrice,
+                            TotalPrice = dealItem.TotalPrice * cartItem.Quantity,
+                            KitchenStatus = "Pending",
+                            CreatedBy = userID
+                        });
+                    }
+                }
+                else
+                {
+                    items.Add(new OrderItem
+                    {
+                        MenuItemID = cartItem.MenuItemID,
+                        Quantity = cartItem.Quantity,
+                        UnitPrice = cartItem.UnitPrice,
+                        TotalPrice = cartItem.TotalPrice,
+                        KitchenStatus = "Pending",
+                        CreatedBy = userID
+                    });
+                }
+            }
+
+            return items;
         }
 
+        /// <summary>
+        /// Gets the active shift ID
+        /// </summary>
+        private int GetActiveShiftID()
+        {
+            // In a real implementation, get from database
+            return 1;
+        }
+
+        #endregion
+
+        #region Message Methods
+
+        /// <summary>
+        /// Shows a success message
+        /// </summary>
         private void ShowSuccessMessage(string message)
         {
             pnlSuccess.Visible = true;
@@ -757,6 +896,9 @@ namespace RestaurantManagementSystem.UI.POS
             ltrSuccessMessage.Text = message;
         }
 
+        /// <summary>
+        /// Shows an error message
+        /// </summary>
         private void ShowErrorMessage(string message)
         {
             pnlError.Visible = true;
@@ -764,172 +906,6 @@ namespace RestaurantManagementSystem.UI.POS
             ltrErrorMessage.Text = message;
         }
 
-        // ============================================
-        // UI/POS/POS.aspx.cs - Add Deal Methods
-        // ============================================
-
-        // Add these methods to the existing POS class
-
-        #region Deal Cart Item Class
-
-        /// <summary>
-        /// Deal Cart Item - Represents a deal in the cart
-        /// </summary>
-        public class DealCartItem
-        {
-            public int DealID { get; set; }
-            public string DealName { get; set; }
-            public decimal DealPrice { get; set; }
-            public int Quantity { get; set; }
-            public List<CartItem> Items { get; set; }
-            public decimal TotalPrice { get { return DealPrice * Quantity; } }
-        }
-
         #endregion
-
-        #region Load Deals
-
-        /// <summary>
-        /// Loads deals for POS display
-        /// </summary>
-        private void LoadDeals()
-        {
-            try
-            {
-                int? branchID = SessionHelper.GetBranchId();
-                if (branchID.HasValue)
-                {
-                    DealBAL dealBAL = new DealBAL();
-                    var deals = dealBAL.GetValidDeals(branchID.Value);
-                    rptDeals.DataSource = deals;
-                    rptDeals.DataBind();
-                    ltrDealCount.Text = deals.Count.ToString();
-                }
-            }
-            catch (Exception ex)
-            {
-                // Log error
-            }
-        }
-
-        #endregion
-
-        #region Deal Cart Handling
-
-        /// <summary>
-        /// Adds a deal to the cart
-        /// </summary>
-        protected void rptDeals_ItemCommand(object source, RepeaterCommandEventArgs e)
-        {
-            try
-            {
-                if (e.CommandName == "AddDeal")
-                {
-                    int dealID = Convert.ToInt32(e.CommandArgument);
-                    AddDealToCart(dealID);
-                }
-            }
-            catch (Exception ex)
-            {
-                ShowErrorMessage($"Error adding deal: {ex.Message}");
-            }
-        }
-
-        /// <summary>
-        /// Adds a deal to the cart with all its items
-        /// </summary>
-        private void AddDealToCart(int dealID)
-        {
-            DealBAL dealBAL = new DealBAL();
-            Deal deal = dealBAL.GetDealWithItems(dealID);
-
-            if (deal != null && deal.IsValid)
-            {
-                // Check if deal already in cart
-                var existingDeal = dealCartItems.Find(d => d.DealID == dealID);
-                if (existingDeal != null)
-                {
-                    existingDeal.Quantity++;
-                }
-                else
-                {
-                    // Create deal cart item
-                    DealCartItem dealItem = new DealCartItem
-                    {
-                        DealID = deal.DealID,
-                        DealName = deal.DealName,
-                        DealPrice = deal.DealPrice,
-                        Quantity = 1,
-                        Items = new List<CartItem>()
-                    };
-
-                    // Add each menu item from the deal
-                    foreach (var item in deal.DealItems)
-                    {
-                        dealItem.Items.Add(new CartItem
-                        {
-                            MenuItemID = item.MenuItemID,
-                            ItemName = item.ItemName,
-                            Quantity = item.Quantity,
-                            UnitPrice = item.Price
-                        });
-                    }
-
-                    dealCartItems.Add(dealItem);
-                }
-
-                Session["POSDealCart"] = dealCartItems;
-                UpdateCartDisplay();
-                CalculateTotals();
-                ShowSuccessMessage($"{deal.DealName} added to cart.");
-            }
-            else
-            {
-                ShowErrorMessage("Deal is not available.");
-            }
-        }
-
-        /// <summary>
-        /// Removes a deal from the cart
-        /// </summary>
-        private void RemoveDealFromCart(int dealID)
-        {
-            var deal = dealCartItems.Find(d => d.DealID == dealID);
-            if (deal != null)
-            {
-                if (deal.Quantity > 1)
-                {
-                    deal.Quantity--;
-                }
-                else
-                {
-                    dealCartItems.Remove(deal);
-                }
-                Session["POSDealCart"] = dealCartItems;
-                UpdateCartDisplay();
-                CalculateTotals();
-            }
-        }
-
-        #endregion
-
-        #region Process Order with Deals
-
-        /// <summary>
-        /// Updated Process Order method to handle deals
-        /// </summary>
-
-
-        #endregion
-
-
-
-        #region Private Fields - Add Deal Cart
-
-        private List<DealCartItem> dealCartItems;
-
-        #endregion
-
-
     }
 }

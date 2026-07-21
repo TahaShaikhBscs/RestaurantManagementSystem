@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using RestaurantManagementSystem.Models;
+using RestaurantManagementSystem.Utilities;
 
 namespace RestaurantManagementSystem.DAL
 {
@@ -201,22 +202,27 @@ namespace RestaurantManagementSystem.DAL
         {
             return new Supplier
             {
-                SupplierID = Convert.ToInt32(row["SupplierID"]),
-                CompanyID = Convert.ToInt32(row["CompanyID"]),
-                BranchID = Convert.ToInt32(row["BranchID"]),
-                SupplierName = row["SupplierName"].ToString(),
-                ContactPerson = row["ContactPerson"]?.ToString(),
-                Phone = row["Phone"]?.ToString(),
-                Email = row["Email"]?.ToString(),
-                Address = row["Address"]?.ToString(),
-                TaxNumber = row["TaxNumber"]?.ToString(),
-                PaymentTerms = row["PaymentTerms"]?.ToString(),
-                Status = Convert.ToBoolean(row["Status"]),
-                CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
-                UpdatedDate = Convert.ToDateTime(row["UpdatedDate"]),
-                CreatedBy = Convert.ToInt32(row["CreatedBy"]),
-                UpdatedBy = Convert.ToInt32(row["UpdatedBy"]),
-                IsDeleted = Convert.ToBoolean(row["IsDeleted"])
+                SupplierID = row.GetInt("SupplierID"),
+                CompanyID = row.GetInt("CompanyID"),
+                BranchID = row.GetInt("BranchID"),
+
+                SupplierName = row.GetString("SupplierName"),
+                ContactPerson = row.GetString("ContactPerson"),
+                Phone = row.GetString("Phone"),
+                Email = row.GetString("Email"),
+                Address = row.GetString("Address"),
+                TaxNumber = row.GetString("TaxNumber"),
+                PaymentTerms = row.GetString("PaymentTerms"),
+
+                Status = row.GetBool("Status"),
+
+                CreatedDate = row.GetDateTime("CreatedDate"),
+                UpdatedDate = row.GetDateTime("UpdatedDate"),
+
+                CreatedBy = row.GetInt("CreatedBy"),
+                UpdatedBy = row.GetInt("UpdatedBy"),
+
+                IsDeleted = row.GetBool("IsDeleted")
             };
         }
     }

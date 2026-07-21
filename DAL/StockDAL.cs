@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using RestaurantManagementSystem.Models;
+using RestaurantManagementSystem.Utilities;
 
 namespace RestaurantManagementSystem.DAL
 {
@@ -321,24 +322,32 @@ namespace RestaurantManagementSystem.DAL
         {
             return new Stock
             {
-                StockID = Convert.ToInt32(row["StockID"]),
-                CompanyID = Convert.ToInt32(row["CompanyID"]),
-                BranchID = Convert.ToInt32(row["BranchID"]),
-                ProductName = row["ProductName"].ToString(),
-                Category = row["Category"]?.ToString(),
-                Quantity = Convert.ToDecimal(row["Quantity"]),
-                UnitPrice = Convert.ToDecimal(row["UnitPrice"]),
-                TotalCost = Convert.ToDecimal(row["TotalCost"]),
-                MinStockLevel = Convert.ToInt32(row["MinStockLevel"]),
-                MaxStockLevel = Convert.ToInt32(row["MaxStockLevel"]),
-                Location = row["Location"]?.ToString(),
-                Barcode = row["Barcode"]?.ToString(),
-                Status = Convert.ToBoolean(row["Status"]),
-                CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
-                UpdatedDate = Convert.ToDateTime(row["UpdatedDate"]),
-                CreatedBy = Convert.ToInt32(row["CreatedBy"]),
-                UpdatedBy = Convert.ToInt32(row["UpdatedBy"]),
-                IsDeleted = Convert.ToBoolean(row["IsDeleted"])
+                StockID = row.GetInt("StockID"),
+                CompanyID = row.GetInt("CompanyID"),
+                BranchID = row.GetInt("BranchID"),
+
+                ProductName = row.GetString("ProductName"),
+                Category = row.GetString("Category"),
+
+                Quantity = row.GetDecimal("Quantity"),
+                UnitPrice = row.GetDecimal("UnitPrice"),
+                TotalCost = row.GetDecimal("TotalCost"),
+
+                MinStockLevel = row.GetInt("MinStockLevel"),
+                MaxStockLevel = row.GetInt("MaxStockLevel"),
+
+                Location = row.GetString("Location"),
+                Barcode = row.GetString("Barcode"),
+
+                Status = row.GetBool("Status"),
+
+                CreatedDate = row.GetDateTime("CreatedDate"),
+                UpdatedDate = row.GetDateTime("UpdatedDate"),
+
+                CreatedBy = row.GetInt("CreatedBy"),
+                UpdatedBy = row.GetInt("UpdatedBy"),
+
+                IsDeleted = row.GetBool("IsDeleted")
             };
         }
 
@@ -397,26 +406,35 @@ namespace RestaurantManagementSystem.DAL
         {
             return new StockTransaction
             {
-                StockTransactionID = Convert.ToInt32(row["StockTransactionID"]),
-                CompanyID = Convert.ToInt32(row["CompanyID"]),
-                BranchID = Convert.ToInt32(row["BranchID"]),
-                StockID = Convert.ToInt32(row["StockID"]),
-                TransactionType = row["TransactionType"].ToString(),
-                ReferenceType = row["ReferenceType"]?.ToString(),
-                ReferenceID = row["ReferenceID"] != DBNull.Value ? Convert.ToInt32(row["ReferenceID"]) : (int?)null,
-                Quantity = Convert.ToDecimal(row["Quantity"]),
-                PreviousQuantity = row["PreviousQuantity"] != DBNull.Value ? Convert.ToDecimal(row["PreviousQuantity"]) : (decimal?)null,
-                NewQuantity = row["NewQuantity"] != DBNull.Value ? Convert.ToDecimal(row["NewQuantity"]) : (decimal?)null,
-                UnitPrice = row["UnitPrice"] != DBNull.Value ? Convert.ToDecimal(row["UnitPrice"]) : (decimal?)null,
-                TotalAmount = row["TotalAmount"] != DBNull.Value ? Convert.ToDecimal(row["TotalAmount"]) : (decimal?)null,
-                Notes = row["Notes"]?.ToString(),
-                TransactionDate = Convert.ToDateTime(row["TransactionDate"]),
-                Status = Convert.ToBoolean(row["Status"]),
-                CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
-                UpdatedDate = Convert.ToDateTime(row["UpdatedDate"]),
-                CreatedBy = Convert.ToInt32(row["CreatedBy"]),
-                UpdatedBy = Convert.ToInt32(row["UpdatedBy"]),
-                IsDeleted = Convert.ToBoolean(row["IsDeleted"])
+                StockTransactionID = row.GetInt("StockTransactionID"),
+                CompanyID = row.GetInt("CompanyID"),
+                BranchID = row.GetInt("BranchID"),
+                StockID = row.GetInt("StockID"),
+
+                TransactionType = row.GetString("TransactionType"),
+                ReferenceType = row.GetString("ReferenceType"),
+
+                ReferenceID = row.GetNullableInt("ReferenceID"),
+
+                Quantity = row.GetDecimal("Quantity"),
+                PreviousQuantity = row.GetNullableDecimal("PreviousQuantity"),
+                NewQuantity = row.GetNullableDecimal("NewQuantity"),
+                UnitPrice = row.GetNullableDecimal("UnitPrice"),
+                TotalAmount = row.GetNullableDecimal("TotalAmount"),
+
+                Notes = row.GetString("Notes"),
+
+                TransactionDate = row.GetDateTime("TransactionDate"),
+
+                Status = row.GetBool("Status"),
+
+                CreatedDate = row.GetDateTime("CreatedDate"),
+                UpdatedDate = row.GetDateTime("UpdatedDate"),
+
+                CreatedBy = row.GetInt("CreatedBy"),
+                UpdatedBy = row.GetInt("UpdatedBy"),
+
+                IsDeleted = row.GetBool("IsDeleted")
             };
         }
     }

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using RestaurantManagementSystem.Models;
+using RestaurantManagementSystem.Utilities;
 
 namespace RestaurantManagementSystem.DAL
 {
@@ -170,23 +171,25 @@ namespace RestaurantManagementSystem.DAL
         #endregion
 
         #region Mapping Methods
-
         private Role MapDataRowToRole(DataRow row)
         {
             return new Role
             {
-                RoleID = Convert.ToInt32(row["RoleID"]),
-                RoleName = row["RoleName"].ToString(),
-                Description = row["Description"]?.ToString(),
-                Status = Convert.ToBoolean(row["Status"]),
-                CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
-                UpdatedDate = Convert.ToDateTime(row["UpdatedDate"]),
-                CreatedBy = Convert.ToInt32(row["CreatedBy"]),
-                UpdatedBy = Convert.ToInt32(row["UpdatedBy"]),
-                IsDeleted = Convert.ToBoolean(row["IsDeleted"])
+                RoleID = row.GetInt("RoleID"),
+                RoleName = row.GetString("RoleName"),
+                Description = row.GetString("Description"),
+
+                Status = row.GetBool("Status"),
+
+                CreatedDate = row.GetDateTime("CreatedDate"),
+                UpdatedDate = row.GetDateTime("UpdatedDate"),
+
+                CreatedBy = row.GetInt("CreatedBy"),
+                UpdatedBy = row.GetInt("UpdatedBy"),
+
+                IsDeleted = row.GetBool("IsDeleted")
             };
         }
-
         #endregion
     }
 }

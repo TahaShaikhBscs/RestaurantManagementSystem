@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using RestaurantManagementSystem.Models;
+using RestaurantManagementSystem.Utilities;
 
 namespace RestaurantManagementSystem.DAL
 {
@@ -241,26 +242,32 @@ namespace RestaurantManagementSystem.DAL
         {
             return new Branch
             {
-                BranchID = Convert.ToInt32(row["BranchID"]),
-                CompanyID = Convert.ToInt32(row["CompanyID"]),
-                BranchName = row["BranchName"].ToString(),
-                Address = row["Address"]?.ToString(),
-                Phone = row["Phone"]?.ToString(),
-                Email = row["Email"]?.ToString(),
-                Kitchen = Convert.ToBoolean(row["Kitchen"]),
-                HasTables = Convert.ToBoolean(row["HasTables"]),
-                HasCashCounter = Convert.ToBoolean(row["HasCashCounter"]),
-                HasWarehouse = Convert.ToBoolean(row["HasWarehouse"]),
-                Status = Convert.ToBoolean(row["Status"]),
-                CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
-                UpdatedDate = Convert.ToDateTime(row["UpdatedDate"]),
-                CreatedBy = Convert.ToInt32(row["CreatedBy"]),
-                UpdatedBy = Convert.ToInt32(row["UpdatedBy"]),
-                IsDeleted = Convert.ToBoolean(row["IsDeleted"]),
-                CompanyName = row.Table.Columns.Contains("CompanyName") ? row["CompanyName"]?.ToString() : null
+                BranchID = row.GetInt("BranchID"),
+                CompanyID = row.GetInt("CompanyID"),
+
+                BranchName = row.GetString("BranchName"),
+                Address = row.GetString("Address"),
+                Phone = row.GetString("Phone"),
+                Email = row.GetString("Email"),
+
+                Kitchen = row.GetBool("Kitchen"),
+                HasTables = row.GetBool("HasTables"),
+                HasCashCounter = row.GetBool("HasCashCounter"),
+                HasWarehouse = row.GetBool("HasWarehouse"),
+
+                Status = row.GetBool("Status"),
+
+                CreatedDate = row.GetDateTime("CreatedDate"),
+                UpdatedDate = row.GetDateTime("UpdatedDate"),
+
+                CreatedBy = row.GetInt("CreatedBy"),
+                UpdatedBy = row.GetInt("UpdatedBy"),
+
+                IsDeleted = row.GetBool("IsDeleted"),
+
+                CompanyName = row.GetString("CompanyName")
             };
         }
-
         #endregion
     }
 }

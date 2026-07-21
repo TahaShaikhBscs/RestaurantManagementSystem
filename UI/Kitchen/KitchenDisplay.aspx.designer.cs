@@ -123,6 +123,15 @@ namespace RestaurantManagementSystem.UI.Kitchen
         protected global::System.Web.UI.WebControls.Literal ltrPendingBadge;
 
         /// <summary>
+        /// pnlNoPendingOrders control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlNoPendingOrders;
+
+        /// <summary>
         /// rptPendingOrders control.
         /// </summary>
         /// <remarks>
@@ -141,6 +150,15 @@ namespace RestaurantManagementSystem.UI.Kitchen
         protected global::System.Web.UI.WebControls.Literal ltrCookingBadge;
 
         /// <summary>
+        /// pnlNoCookingOrders control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlNoCookingOrders;
+
+        /// <summary>
         /// rptCookingOrders control.
         /// </summary>
         /// <remarks>
@@ -157,6 +175,15 @@ namespace RestaurantManagementSystem.UI.Kitchen
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Literal ltrReadyBadge;
+
+        /// <summary>
+        /// pnlNoReadyOrders control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlNoReadyOrders;
 
         /// <summary>
         /// rptReadyOrders control.

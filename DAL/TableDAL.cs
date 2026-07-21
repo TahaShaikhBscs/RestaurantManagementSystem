@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using RestaurantManagementSystem.Models;
+using RestaurantManagementSystem.Utilities;
 
 namespace RestaurantManagementSystem.DAL
 {
@@ -249,21 +250,29 @@ namespace RestaurantManagementSystem.DAL
         {
             return new RestaurantTable
             {
-                TableID = Convert.ToInt32(row["TableID"]),
-                CompanyID = Convert.ToInt32(row["CompanyID"]),
-                BranchID = Convert.ToInt32(row["BranchID"]),
-                TableNumber = row["TableNumber"].ToString(),
-                Floor = row["Floor"]?.ToString(),
-                Capacity = Convert.ToInt32(row["Capacity"]),
-                Status = row["Status"].ToString(),
-                IsActive = Convert.ToBoolean(row["IsActive"]),
-                QRCode = row["QRCode"]?.ToString(),
-                _Status = Convert.ToBoolean(row["Status"]),
-                CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
-                UpdatedDate = Convert.ToDateTime(row["UpdatedDate"]),
-                CreatedBy = Convert.ToInt32(row["CreatedBy"]),
-                UpdatedBy = Convert.ToInt32(row["UpdatedBy"]),
-                IsDeleted = Convert.ToBoolean(row["IsDeleted"])
+                TableID = row.GetInt("TableID"),
+                CompanyID = row.GetInt("CompanyID"),
+                BranchID = row.GetInt("BranchID"),
+
+                TableNumber = row.GetString("TableNumber"),
+                Floor = row.GetString("Floor"),
+
+                Capacity = row.GetInt("Capacity"),
+
+                Status = row.GetString("Status"),
+                IsActive = row.GetBool("IsActive"),
+
+                QRCode = row.GetString("QRCode"),
+
+                _Status = row.GetBool("_Status"),
+
+                CreatedDate = row.GetDateTime("CreatedDate"),
+                UpdatedDate = row.GetDateTime("UpdatedDate"),
+
+                CreatedBy = row.GetInt("CreatedBy"),
+                UpdatedBy = row.GetInt("UpdatedBy"),
+
+                IsDeleted = row.GetBool("IsDeleted")
             };
         }
     }

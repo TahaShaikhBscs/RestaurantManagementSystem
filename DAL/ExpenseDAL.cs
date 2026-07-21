@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using RestaurantManagementSystem.Models;
+using RestaurantManagementSystem.Utilities;
 
 namespace RestaurantManagementSystem.DAL
 {
@@ -246,23 +247,32 @@ namespace RestaurantManagementSystem.DAL
         {
             return new Expense
             {
-                ExpenseID = Convert.ToInt32(row["ExpenseID"]),
-                CompanyID = Convert.ToInt32(row["CompanyID"]),
-                BranchID = Convert.ToInt32(row["BranchID"]),
-                ExpenseCategory = row["ExpenseCategory"].ToString(),
-                Description = row["Description"]?.ToString(),
-                Amount = Convert.ToDecimal(row["Amount"]),
-                ExpenseDate = Convert.ToDateTime(row["ExpenseDate"]),
-                PaymentMethod = row["PaymentMethod"]?.ToString(),
-                ReceiptNumber = row["ReceiptNumber"]?.ToString(),
-                IsRecurring = Convert.ToBoolean(row["IsRecurring"]),
-                RecurringType = row["RecurringType"]?.ToString(),
-                Status = Convert.ToBoolean(row["Status"]),
-                CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
-                UpdatedDate = Convert.ToDateTime(row["UpdatedDate"]),
-                CreatedBy = Convert.ToInt32(row["CreatedBy"]),
-                UpdatedBy = Convert.ToInt32(row["UpdatedBy"]),
-                IsDeleted = Convert.ToBoolean(row["IsDeleted"])
+                ExpenseID = row.GetInt("ExpenseID"),
+                CompanyID = row.GetInt("CompanyID"),
+                BranchID = row.GetInt("BranchID"),
+
+                ExpenseCategory = row.GetString("ExpenseCategory"),
+                Description = row.GetString("Description"),
+
+                Amount = row.GetDecimal("Amount"),
+
+                ExpenseDate = row.GetDateTime("ExpenseDate"),
+
+                PaymentMethod = row.GetString("PaymentMethod"),
+                ReceiptNumber = row.GetString("ReceiptNumber"),
+
+                IsRecurring = row.GetBool("IsRecurring"),
+                RecurringType = row.GetString("RecurringType"),
+
+                Status = row.GetBool("Status"),
+
+                CreatedDate = row.GetDateTime("CreatedDate"),
+                UpdatedDate = row.GetDateTime("UpdatedDate"),
+
+                CreatedBy = row.GetInt("CreatedBy"),
+                UpdatedBy = row.GetInt("UpdatedBy"),
+
+                IsDeleted = row.GetBool("IsDeleted")
             };
         }
     }

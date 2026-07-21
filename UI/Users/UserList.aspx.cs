@@ -1,7 +1,4 @@
-﻿// ============================================
-// UI/Users/UserList.aspx.cs
-// ============================================
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Web.UI;
@@ -78,9 +75,25 @@ namespace RestaurantManagementSystem.UI.Users
         {
             try
             {
-                // In a real implementation, we would have a method to get users by branch
-                // For now, we'll use a simplified approach
+                string searchTerm = txtSearch.Text.Trim();
+                int branchFilter = Convert.ToInt32(ddlBranchFilter.SelectedValue);
                 List<UserModel> users = new List<UserModel>();
+                if (string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    if (branchFilter > 0)
+                    {
+                        //users = userBAL.GetBranchesByCompany(branchFilter);
+                    }
+                    else
+                    {
+                        users = userBAL.GetAllUser();
+                    }
+                }
+                else
+                {
+                    //users = userBAL.Search(searchTerm, companyFilter > 0 ? companyFilter : (int?)null);
+                }
+                
 
                 // This would be replaced with actual DAL call
                 // For demonstration, we'll use a placeholder

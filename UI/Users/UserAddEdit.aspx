@@ -1,7 +1,4 @@
-﻿<!-- ============================================ -->
-<!-- UI/Users/UserAddEdit.aspx -->
-<!-- ============================================ -->
-
+﻿
 <%@ Page Title="User Details" Language="C#" MasterPageFile="~/UI/MasterPage.master" AutoEventWireup="true" CodeBehind="UserAddEdit.aspx.cs" Inherits="RestaurantManagementSystem.UI.Users.UserAddEdit" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">

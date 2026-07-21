@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using RestaurantManagementSystem.Models;
+using RestaurantManagementSystem.Utilities;
 
 namespace RestaurantManagementSystem.DAL
 {
@@ -365,23 +366,37 @@ namespace RestaurantManagementSystem.DAL
         {
             return new Deal
             {
-                DealID = Convert.ToInt32(row["DealID"]),
-                CompanyID = Convert.ToInt32(row["CompanyID"]),
-                BranchID = Convert.ToInt32(row["BranchID"]),
-                DealName = row["DealName"].ToString(),
-                Description = row["Description"]?.ToString(),
-                DealPrice = Convert.ToDecimal(row["DealPrice"]),
-                Image = row["Image"]?.ToString(),
-                StartDate = row["StartDate"] != DBNull.Value ? Convert.ToDateTime(row["StartDate"]) : (DateTime?)null,
-                EndDate = row["EndDate"] != DBNull.Value ? Convert.ToDateTime(row["EndDate"]) : (DateTime?)null,
-                Status = Convert.ToBoolean(row["Status"]),
-                CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
-                UpdatedDate = Convert.ToDateTime(row["UpdatedDate"]),
-                CreatedBy = Convert.ToInt32(row["CreatedBy"]),
-                UpdatedBy = Convert.ToInt32(row["UpdatedBy"]),
-                IsDeleted = Convert.ToBoolean(row["IsDeleted"]),
-                ItemCount = row.Table.Columns.Contains("ItemCount") ? Convert.ToInt32(row["ItemCount"]) : 0,
-                OriginalPrice = row.Table.Columns.Contains("OriginalPrice") ? Convert.ToDecimal(row["OriginalPrice"]) : 0
+                DealID = row.GetInt("DealID"),
+                CompanyID = row.GetInt("CompanyID"),
+                BranchID = row.GetInt("BranchID"),
+
+                DealName = row.GetString("DealName"),
+                Description = row.GetString("Description"),
+
+                DealPrice = row.GetDecimal("DealPrice"),
+
+                Image = row.GetString("Image"),
+
+                StartDate = row.GetNullableDateTime("StartDate"),
+                EndDate = row.GetNullableDateTime("EndDate"),
+
+                Status = row.GetBool("Status"),
+
+                CreatedDate = row.GetDateTime("CreatedDate"),
+                UpdatedDate = row.GetDateTime("UpdatedDate"),
+
+                CreatedBy = row.GetInt("CreatedBy"),
+                UpdatedBy = row.GetInt("UpdatedBy"),
+
+                IsDeleted = row.GetBool("IsDeleted"),
+
+                ItemCount = row.Table.Columns.Contains("ItemCount")
+                    ? row.GetInt("ItemCount")
+                    : 0,
+
+                OriginalPrice = row.Table.Columns.Contains("OriginalPrice")
+                    ? row.GetDecimal("OriginalPrice")
+                    : 0
             };
         }
 
@@ -392,22 +407,29 @@ namespace RestaurantManagementSystem.DAL
         {
             return new DealItem
             {
-                DealItemID = Convert.ToInt32(row["DealItemID"]),
-                DealID = Convert.ToInt32(row["DealID"]),
-                MenuItemID = Convert.ToInt32(row["MenuItemID"]),
-                Quantity = Convert.ToInt32(row["Quantity"]),
-                Status = Convert.ToBoolean(row["Status"]),
-                CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
-                UpdatedDate = Convert.ToDateTime(row["UpdatedDate"]),
-                CreatedBy = Convert.ToInt32(row["CreatedBy"]),
-                UpdatedBy = Convert.ToInt32(row["UpdatedBy"]),
-                IsDeleted = Convert.ToBoolean(row["IsDeleted"]),
-                ItemName = row["ItemName"].ToString(),
-                Price = Convert.ToDecimal(row["Price"]),
-                Description = row["Description"]?.ToString(),
-                Image = row["Image"]?.ToString(),
-                CategoryID = Convert.ToInt32(row["CategoryID"]),
-                CategoryName = row["CategoryName"].ToString()
+                DealItemID = row.GetInt("DealItemID"),
+                DealID = row.GetInt("DealID"),
+                MenuItemID = row.GetInt("MenuItemID"),
+
+                Quantity = row.GetInt("Quantity"),
+
+                Status = row.GetBool("Status"),
+
+                CreatedDate = row.GetDateTime("CreatedDate"),
+                UpdatedDate = row.GetDateTime("UpdatedDate"),
+
+                CreatedBy = row.GetInt("CreatedBy"),
+                UpdatedBy = row.GetInt("UpdatedBy"),
+
+                IsDeleted = row.GetBool("IsDeleted"),
+
+                ItemName = row.GetString("ItemName"),
+                Price = row.GetDecimal("Price"),
+                Description = row.GetString("Description"),
+                Image = row.GetString("Image"),
+
+                CategoryID = row.GetInt("CategoryID"),
+                CategoryName = row.GetString("CategoryName")
             };
         }
 

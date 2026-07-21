@@ -62,6 +62,8 @@ namespace RestaurantManagementSystem.UI.Kitchen
                 List<KitchenOrderModel> pending = orderBAL.GetKitchenOrders(branchID.Value, "Pending");
                 rptPendingOrders.DataSource = pending;
                 rptPendingOrders.DataBind();
+                rptPendingOrders.Visible = pending.Count > 0;
+                pnlNoPendingOrders.Visible = pending.Count == 0;
                 ltrPendingCount.Text = pending.Count.ToString();
                 ltrPendingBadge.Text = pending.Count.ToString();
 
@@ -69,6 +71,8 @@ namespace RestaurantManagementSystem.UI.Kitchen
                 List<KitchenOrderModel> cooking = orderBAL.GetKitchenOrders(branchID.Value, "Cooking");
                 rptCookingOrders.DataSource = cooking;
                 rptCookingOrders.DataBind();
+                rptCookingOrders.Visible = cooking.Count > 0;
+                pnlNoCookingOrders.Visible = cooking.Count == 0;
                 ltrCookingCount.Text = cooking.Count.ToString();
                 ltrCookingBadge.Text = cooking.Count.ToString();
 
@@ -76,6 +80,8 @@ namespace RestaurantManagementSystem.UI.Kitchen
                 List<KitchenOrderModel> ready = orderBAL.GetKitchenOrders(branchID.Value, "Ready");
                 rptReadyOrders.DataSource = ready;
                 rptReadyOrders.DataBind();
+                rptReadyOrders.Visible = ready.Count > 0;
+                pnlNoReadyOrders.Visible = ready.Count == 0;
                 ltrReadyCount.Text = ready.Count.ToString();
                 ltrReadyBadge.Text = ready.Count.ToString();
 

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using RestaurantManagementSystem.Models;
+using RestaurantManagementSystem.Utilities;
 
 namespace RestaurantManagementSystem.DAL
 {
@@ -327,25 +328,38 @@ namespace RestaurantManagementSystem.DAL
         {
             return new Customer
             {
-                CustomerID = Convert.ToInt32(row["CustomerID"]),
-                CompanyID = Convert.ToInt32(row["CompanyID"]),
-                BranchID = Convert.ToInt32(row["BranchID"]),
-                CustomerName = row["CustomerName"].ToString(),
-                Phone = row["Phone"]?.ToString(),
-                Email = row["Email"]?.ToString(),
-                Address = row["Address"]?.ToString(),
-                CustomerType = row["CustomerType"]?.ToString() ?? "Regular",
-                LoyaltyPoints = Convert.ToInt32(row["LoyaltyPoints"]),
-                MembershipNumber = row["MembershipNumber"]?.ToString(),
-                Birthday = row["Birthday"] != DBNull.Value ? Convert.ToDateTime(row["Birthday"]) : (DateTime?)null,
-                Gender = row["Gender"]?.ToString(),
-                TotalPurchases = Convert.ToDecimal(row["TotalPurchases"]),
-                Status = Convert.ToBoolean(row["Status"]),
-                CreatedDate = Convert.ToDateTime(row["CreatedDate"]),
-                UpdatedDate = Convert.ToDateTime(row["UpdatedDate"]),
-                CreatedBy = Convert.ToInt32(row["CreatedBy"]),
-                UpdatedBy = Convert.ToInt32(row["UpdatedBy"]),
-                IsDeleted = Convert.ToBoolean(row["IsDeleted"])
+                CustomerID = row.GetInt("CustomerID"),
+                CompanyID = row.GetInt("CompanyID"),
+                BranchID = row.GetInt("BranchID"),
+
+                CustomerName = row.GetString("CustomerName"),
+                Phone = row.GetString("Phone"),
+                Email = row.GetString("Email"),
+                Address = row.GetString("Address"),
+
+                CustomerType = string.IsNullOrWhiteSpace(row.GetString("CustomerType"))
+                    ? "Regular"
+                    : row.GetString("CustomerType"),
+
+                LoyaltyPoints = row.GetInt("LoyaltyPoints"),
+
+                MembershipNumber = row.GetString("MembershipNumber"),
+
+                Birthday = row.GetNullableDateTime("Birthday"),
+
+                Gender = row.GetString("Gender"),
+
+                TotalPurchases = row.GetDecimal("TotalPurchases"),
+
+                Status = row.GetBool("Status"),
+
+                CreatedDate = row.GetDateTime("CreatedDate"),
+                UpdatedDate = row.GetDateTime("UpdatedDate"),
+
+                CreatedBy = row.GetInt("CreatedBy"),
+                UpdatedBy = row.GetInt("UpdatedBy"),
+
+                IsDeleted = row.GetBool("IsDeleted")
             };
         }
     }

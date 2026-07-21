@@ -53,7 +53,12 @@ namespace RestaurantManagementSystem.Utilities
         {
             return row.GetValue<DateTime>(columnName);
         }
-
+        public static DateTime? GetNullableDateTime(this DataRow row, string columnName)
+        {
+            return row.Table.Columns.Contains(columnName) && row[columnName] != DBNull.Value
+                ? Convert.ToDateTime(row[columnName])
+                : (DateTime?)null;
+        }
         public static double GetDouble(this DataRow row, string columnName)
         {
             return row.GetValue<double>(columnName);
@@ -78,7 +83,19 @@ namespace RestaurantManagementSystem.Utilities
         {
             return row.GetValue<Guid>(columnName);
         }
+        public static int? GetNullableInt(this DataRow row, string columnName)
+        {
+            return row.Table.Columns.Contains(columnName) && row[columnName] != DBNull.Value
+                ? Convert.ToInt32(row[columnName])
+                : (int?)null;
+        }
 
+        public static decimal? GetNullableDecimal(this DataRow row, string columnName)
+        {
+            return row.Table.Columns.Contains(columnName) && row[columnName] != DBNull.Value
+                ? Convert.ToDecimal(row[columnName])
+                : (decimal?)null;
+        }
         public static byte[] GetBytes(this DataRow row, string columnName)
         {
             if (!row.Table.Columns.Contains(columnName) ||

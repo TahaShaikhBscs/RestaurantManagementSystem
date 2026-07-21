@@ -1,7 +1,4 @@
-﻿// ============================================
-// UI/Tables/TableAddEdit.aspx.cs
-// ============================================
-
+﻿
 using System;
 using System.Web.UI;
 using RestaurantManagementSystem.BAL;

@@ -1,6 +1,4 @@
-﻿
-
-<%@ Page Title="Kitchen Display" Language="C#" MasterPageFile="~/UI/MasterPage.master" AutoEventWireup="true" CodeBehind="KitchenDisplay.aspx.cs" Inherits="RestaurantManagementSystem.UI.Kitchen.KitchenDisplay" %>
+﻿<%@ Page Title="Kitchen Display" Language="C#" MasterPageFile="~/UI/MasterPage.master" AutoEventWireup="true" CodeBehind="KitchenDisplay.aspx.cs" Inherits="RestaurantManagementSystem.UI.Kitchen.KitchenDisplay" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
     Kitchen Display - Restaurant Management System
@@ -61,25 +59,29 @@
                         <div class="col-md-3">
                             <span class="badge bg-warning rounded-pill px-3 py-2">
                                 <i class="fas fa-clock me-1"></i>
-                                Pending: <asp:Literal ID="ltrPendingCount" runat="server" Text="0" />
+                                Pending:
+                                <asp:Literal ID="ltrPendingCount" runat="server" Text="0" />
                             </span>
                         </div>
                         <div class="col-md-3">
                             <span class="badge bg-info rounded-pill px-3 py-2">
                                 <i class="fas fa-fire me-1"></i>
-                                Cooking: <asp:Literal ID="ltrCookingCount" runat="server" Text="0" />
+                                Cooking:
+                                <asp:Literal ID="ltrCookingCount" runat="server" Text="0" />
                             </span>
                         </div>
                         <div class="col-md-3">
                             <span class="badge bg-success rounded-pill px-3 py-2">
                                 <i class="fas fa-check-circle me-1"></i>
-                                Ready: <asp:Literal ID="ltrReadyCount" runat="server" Text="0" />
+                                Ready:
+                                <asp:Literal ID="ltrReadyCount" runat="server" Text="0" />
                             </span>
                         </div>
                         <div class="col-md-3">
                             <span class="badge bg-danger rounded-pill px-3 py-2">
                                 <i class="fas fa-exclamation-triangle me-1"></i>
-                                Delayed: <asp:Literal ID="ltrDelayedCount" runat="server" Text="0" />
+                                Delayed:
+                                <asp:Literal ID="ltrDelayedCount" runat="server" Text="0" />
                             </span>
                         </div>
                     </div>
@@ -103,6 +105,12 @@
                     </h6>
                 </div>
                 <div class="card-body p-2" style="max-height: 500px; overflow-y: auto;">
+                    <asp:Panel ID="pnlNoPendingOrders" runat="server" Visible="false">
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle fa-2x text-muted mb-2 d-block"></i>
+                            <p class="text-muted small">No pending orders</p>
+                        </div>
+                    </asp:Panel>
                     <asp:Repeater ID="rptPendingOrders" runat="server" OnItemCommand="rptOrders_ItemCommand">
                         <ItemTemplate>
                             <div class="kitchen-order pending mb-2">
@@ -111,9 +119,12 @@
                                         <strong>#<%# Eval("OrderNumber") %></strong>
                                         <span class="badge bg-secondary ms-1"><%# Eval("TableNumber") ?? "TA" %></span>
                                     </div>
-                                    <span class="badge bg-<%# GetPriorityBadgeClass(Eval("PriorityStatus")) %>">
+                                    <span class="badge bg-<%# GetPriorityBadgeClass(Convert.ToString(Eval("PriorityStatus"))) %>">
                                         <%# Eval("PriorityStatus") %>
-                                    </span>
+</span>
+                                    <%--<span class="badge bg-<%# GetPriorityBadgeClass(Eval("PriorityStatus")) %>">
+                                        <%# Eval("PriorityStatus") %>
+                                    </span>--%>
                                 </div>
                                 <div class="mt-1">
                                     <span class="fw-bold"><%# Eval("Quantity") %>x</span>
@@ -133,12 +144,12 @@
                                 </div>
                             </div>
                         </ItemTemplate>
-                        <EmptyDataTemplate>
+                        <%--<EmptyDataTemplate>
                             <div class="text-center py-4">
                                 <i class="fas fa-check-circle fa-2x text-muted mb-2 d-block"></i>
                                 <p class="text-muted small">No pending orders</p>
                             </div>
-                        </EmptyDataTemplate>
+                        </EmptyDataTemplate>--%>
                     </asp:Repeater>
                 </div>
             </div>
@@ -157,6 +168,12 @@
                     </h6>
                 </div>
                 <div class="card-body p-2" style="max-height: 500px; overflow-y: auto;">
+                    <asp:Panel ID="pnlNoCookingOrders" runat="server" Visible="false">
+                        <div class="text-center py-4">
+                            <i class="fas fa-fire fa-2x text-muted mb-2 d-block"></i>
+                            <p class="text-muted small">No orders cooking</p>
+                        </div>
+                    </asp:Panel>
                     <asp:Repeater ID="rptCookingOrders" runat="server" OnItemCommand="rptOrders_ItemCommand">
                         <ItemTemplate>
                             <div class="kitchen-order cooking mb-2">
@@ -165,7 +182,7 @@
                                         <strong>#<%# Eval("OrderNumber") %></strong>
                                         <span class="badge bg-secondary ms-1"><%# Eval("TableNumber") ?? "TA" %></span>
                                     </div>
-                                    <span class="badge bg-<%# GetPriorityBadgeClass(Eval("PriorityStatus")) %>">
+                                    <span class="badge bg-<%# GetPriorityBadgeClass(Convert.ToString(Eval("PriorityStatus"))) %>">
                                         <%# Eval("PriorityStatus") %>
                                     </span>
                                 </div>
@@ -187,12 +204,12 @@
                                 </div>
                             </div>
                         </ItemTemplate>
-                        <EmptyDataTemplate>
+                        <%-- <emptydatatemplate>
                             <div class="text-center py-4">
                                 <i class="fas fa-fire fa-2x text-muted mb-2 d-block"></i>
                                 <p class="text-muted small">No orders cooking</p>
                             </div>
-                        </EmptyDataTemplate>
+                        </emptydatatemplate>--%>
                     </asp:Repeater>
                 </div>
             </div>
@@ -211,6 +228,12 @@
                     </h6>
                 </div>
                 <div class="card-body p-2" style="max-height: 500px; overflow-y: auto;">
+                    <asp:Panel ID="pnlNoReadyOrders" runat="server" Visible="false">
+                        <div class="text-center py-4">
+                            <i class="fas fa-utensils fa-2x text-muted mb-2 d-block"></i>
+                            <p class="text-muted small">No ready orders</p>
+                        </div>
+                    </asp:Panel>
                     <asp:Repeater ID="rptReadyOrders" runat="server" OnItemCommand="rptOrders_ItemCommand">
                         <ItemTemplate>
                             <div class="kitchen-order ready mb-2">
@@ -235,12 +258,12 @@
                                 </div>
                             </div>
                         </ItemTemplate>
-                        <EmptyDataTemplate>
+                        <%-- <emptydatatemplate>
                             <div class="text-center py-4">
                                 <i class="fas fa-utensils fa-2x text-muted mb-2 d-block"></i>
                                 <p class="text-muted small">No ready orders</p>
                             </div>
-                        </EmptyDataTemplate>
+                        </emptydatatemplate>--%>
                     </asp:Repeater>
                 </div>
             </div>
@@ -250,7 +273,7 @@
 
 <asp:Content ID="Content3" ContentPlaceHolderID="ScriptsContent" runat="server">
     <script type="text/javascript">
-        $(document).ready(function() {
+        $(document).ready(function () {
             // Update time
             function updateTime() {
                 var now = new Date();
@@ -261,13 +284,13 @@
 
             // Auto-refresh every 30 seconds if enabled
             var autoRefresh = false;
-            $('#<%= btnAutoRefresh.ClientID %>').click(function() {
+            $('#<%= btnAutoRefresh.ClientID %>').click(function () {
                 autoRefresh = !autoRefresh;
                 $(this).text(autoRefresh ? 'Auto Refresh On' : 'Auto Refresh');
                 $(this).toggleClass('btn-secondary btn-success');
-                
+
                 if (autoRefresh) {
-                    setInterval(function() {
+                    setInterval(function () {
                         if (autoRefresh) {
                             __doPostBack('btnRefresh', '');
                         }
@@ -276,7 +299,7 @@
             });
 
             // Auto-hide alerts
-            setTimeout(function() {
+            setTimeout(function () {
                 $('.alert').fadeOut('slow');
             }, 5000);
         });

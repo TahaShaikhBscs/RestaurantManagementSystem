@@ -1,16 +1,16 @@
 ﻿// ============================================
-// Models/Order.cs - Updated for POS
+// Models/POS/POSOrder.cs
 // ============================================
 
 using System;
 using System.Collections.Generic;
 
-namespace RestaurantManagementSystem.Models
+namespace RestaurantManagementSystem.Models.POS
 {
     /// <summary>
-    /// Order Model - Represents a customer order
+    /// POS Order Model - Complete order with all details
     /// </summary>
-    public class Order
+    public class POSOrder
     {
         #region Properties
 
@@ -20,20 +20,21 @@ namespace RestaurantManagementSystem.Models
         public int? TableID { get; set; }
         public int? CustomerID { get; set; }
         public string OrderNumber { get; set; }
-        public string OrderType { get; set; } // Dine In, Take Away, Delivery
-        public string OrderStatus { get; set; } // Pending, Cooking, Ready, Completed, Cancelled
-        public string PaymentStatus { get; set; } // Pending, Partial, Completed
+        public string OrderType { get; set; }
+        public int OrderStatusID { get; set; }
+        public string PaymentStatus { get; set; }
         public decimal SubTotal { get; set; }
         public decimal Tax { get; set; }
         public decimal Discount { get; set; }
         public decimal ServiceCharge { get; set; }
         public decimal DeliveryCharge { get; set; }
-        public decimal TipAmount { get; set; }
         public decimal TotalAmount { get; set; }
         public decimal PaidAmount { get; set; }
         public decimal ChangeAmount { get; set; }
+        public decimal TipAmount { get; set; }
         public DateTime OrderDate { get; set; }
-        public DateTime? DeliveryDate { get; set; }
+        public int? EstimatedTime { get; set; }
+        public int? ActualTime { get; set; }
         public string DeliveryAddress { get; set; }
         public string SpecialInstructions { get; set; }
         public string OrderSource { get; set; }
@@ -63,42 +64,17 @@ namespace RestaurantManagementSystem.Models
         public string CustomerName { get; set; }
         public string CustomerPhone { get; set; }
         public string TableNumber { get; set; }
+        public string OrderStatusName { get; set; }
+        public string OrderStatusColor { get; set; }
         public string CreatedByUserName { get; set; }
-        public string OrderStatusBadgeClass
-        {
-            get
-            {
-                switch (OrderStatus)
-                {
-                    case "Pending": return "warning";
-                    case "Cooking": return "info";
-                    case "Ready": return "primary";
-                    case "Completed": return "success";
-                    case "Cancelled": return "danger";
-                    case "Void": return "secondary";
-                    default: return "secondary";
-                }
-            }
-        }
 
         #endregion
 
         #region Navigation Properties
 
-        public List<OrderItem> OrderItems { get; set; }
-        public List<Payment> Payments { get; set; }
+        public List<POSOrderItem> OrderItems { get; set; }
+        public List<POSPayment> Payments { get; set; }
         public List<OrderCoupon> Coupons { get; set; }
-
-        #endregion
-
-        #region Constructor
-
-        public Order()
-        {
-            OrderItems = new List<OrderItem>();
-            Payments = new List<Payment>();
-            Coupons = new List<OrderCoupon>();
-        }
 
         #endregion
     }

@@ -1,15 +1,16 @@
 ﻿// ============================================
-// Models/OrderItem.cs - Updated for POS
+// Models/POS/POSOrderItem.cs
 // ============================================
 
 using System;
+using System.Collections.Generic;
 
-namespace RestaurantManagementSystem.Models
+namespace RestaurantManagementSystem.Models.POS
 {
     /// <summary>
-    /// Order Item Model - Represents individual items in an order
+    /// POS Order Item Model
     /// </summary>
-    public class OrderItem
+    public class POSOrderItem
     {
         #region Properties
 
@@ -22,7 +23,7 @@ namespace RestaurantManagementSystem.Models
         public decimal Discount { get; set; }
         public decimal TotalPrice { get; set; }
         public string Instructions { get; set; }
-        public string KitchenStatus { get; set; } // Pending, Cooking, Ready, Served
+        public int KitchenStatusID { get; set; }
         public int? PreparationTime { get; set; }
         public bool IsVoid { get; set; }
         public string VoidReason { get; set; }
@@ -42,22 +43,14 @@ namespace RestaurantManagementSystem.Models
         public string ItemName { get; set; }
         public string CategoryName { get; set; }
         public string DealName { get; set; }
-        public string KitchenStatusBadgeClass
-        {
-            get
-            {
-                switch (KitchenStatus)
-                {
-                    case "Pending": return "warning";
-                    case "Cooking": return "info";
-                    case "Ready": return "success";
-                    case "Served": return "primary";
-                    default: return "secondary";
-                }
-            }
-        }
+        public string KitchenStatusName { get; set; }
+        public string KitchenStatusColor { get; set; }
 
-        public string Barcode { get; internal set; }
+        #endregion
+
+        #region Navigation Properties
+
+        public List<OrderModifier> Modifiers { get; set; }
 
         #endregion
     }
